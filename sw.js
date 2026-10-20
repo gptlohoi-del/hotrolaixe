@@ -1,62 +1,94 @@
-const CACHE_NAME = 'drive-smooth-v2';
-const ASSETS_TO_CACHE = [
+const CACHE_NAME = 'drive-smooth-offline-v1';
+const CORE_ASSETS = [
+  './',
   './index.html',
   './manifest.json',
-  'https://cdn-icons-png.flaticon.com/512/18307/18307152.png',
-  'https://cdn.jsdelivr.net/npm/chart.js'
+  './sounds.json',
+  'https://cdn-icons-png.flaticon.com/512/18307/18307152.png'
 ];
 
-// Sự kiện Install: Cài đặt và cache các tài nguyên tĩnh cơ bản
+// Hàm đọc sounds.json và lưu toàn bộ file MP3 vào Cache
+async function cacheSoundsFromJson(cache) {
+  try {
+    const response = await fetch('./sounds.json', { cache: 'no-store' });
+    if (response.ok) {
+      await cache.put('./sounds.json', response.clone());
+      const data = await response.json();
+      if (data && data.files) {
+        const mp3Urls = Object.values(data.files);
+        await Promise.allSettled(
+          mp3Urls.map(async (url) => {
+            const audioRes = await fetch(url, { cache: 'no-store' });
+            if (audioRes.ok) {
+              await cache.put(url, audioRes);
+            }
+          })
+        );
+      }
+    }
+  } catch (err) {
+    // Nếu đang offline lúc cài đặt thì bỏ qua, dùng cache sẵn có
+  }
+}
+
+// Cài đặt Service Worker
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+    caches.open(CACHE_NAME).then(async (cache) => {
+      await Promise.allSettled(CORE_ASSETS.map((url) => cache.add(url)));
+      await cacheSoundsFromJson(cache);
     })
   );
   self.skipWaiting();
 });
 
-// Sự kiện Activate: Dọn dẹp cache cũ nếu có phiên bản mới
+// Kích hoạt và dọn cache cũ
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            return caches.delete(cache);
-          }
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) return caches.delete(key);
         })
-      );
-    })
+      )
+    )
   );
   self.clients.claim();
 });
 
-// Sự kiện Fetch: Áp dụng chiến lược Network First (Ưu tiên mạng)
+// Lắng nghe lệnh "Cập nhật âm thanh" từ giao diện người dùng
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.action === 'UPDATE_SOUNDS') {
+    event.waitUntil(
+      caches.open(CACHE_NAME).then(async (cache) => {
+        await cacheSoundsFromJson(cache);
+        if (event.source) {
+          event.source.postMessage({ status: 'SOUNDS_UPDATED' });
+        }
+      })
+    );
+  }
+});
+
+// Chiến lược Network First (Ưu tiên mạng, rớt mạng dùng Cache)
 self.addEventListener('fetch', (event) => {
-  // Chỉ xử lý các request GET
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
     fetch(event.request)
       .then((networkResponse) => {
-        // Nếu fetch từ mạng thành công, cập nhật lại cache mới nhất và trả về response
         if (networkResponse && networkResponse.status === 200) {
-          const responseClone = networkResponse.clone();
+          const cloned = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone);
+            cache.put(event.request, cloned);
           });
         }
         return networkResponse;
       })
       .catch(() => {
-        // Nếu mất kết nối mạng, tìm kiếm dữ liệu đã lưu trong cache
         return caches.match(event.request).then((cachedResponse) => {
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          // Fallback nếu không có mạng lẫn trong cache (ví dụ trang chính)
-          if (event.request.headers.get('accept').includes('text/html')) {
+          if (cachedResponse) return cachedResponse;
+          if (event.request.headers.get('accept')?.includes('text/html')) {
             return caches.match('./index.html');
           }
         });

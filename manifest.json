@@ -1,12 +1,12 @@
 {
-  "name": "Hỗ trợ lái xe",
-  "short_name": "DriveSmooth",
+  "name": "Trợ lý Lái xe Êm ái",
+  "short_name": "Lái Êm",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
+  "background_color": "#0b1120",
+  "theme_color": "#0b1120",
   "orientation": "portrait",
-  "description": "Ứng dụng phân tích lực G, chấm điểm lái xe êm ái và cảnh báo bằng giọng nói tiếng Việt.",
+  "description": "Ứng dụng hỗ trợ luyện tay lái êm trên đường đèo, cảnh báo bằng âm thanh MP3 Offline.",
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/1126/1126585.png",

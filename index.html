@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SmoothDrive Telemetry - Lái xe êm ái</title>
+    
+    <!-- PWA Manifest & Meta -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://placehold.co/192x192/3b82f6/ffffff?text=SD">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#090d16',
+                        cardBg: '#131b2e',
+                        cardBorder: '#1e293b'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            background-color: #090d16;
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            touch-action: manipulation;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090d16;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+        .gauge-ring {
+            transition: stroke-dashoffset 0.3s ease;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-blue-500 selection:text-white">
+
+    <!-- Header / Navbar -->
+    <header class="bg-cardBg/90 backdrop-blur-md border-b border-cardBorder sticky top-0 z-50 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-blue-600 p-2.5 rounded-xl shadow-lg shadow-blue-500/30 text-white">
+                    <i class="fa-solid fa-gauge-high text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg tracking-tight flex items-center gap-2">
+                        SmoothDrive <span class="text-xs bg-blue-500/20 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-full font-normal">PWA</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Trợ lý lái xe êm ái & Phân tích lực G</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <!-- PWA Install Button -->
+                <button id="installBtn" class="hidden items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow-md transition-all">
+                    <i class="fa-solid fa-download"></i> Cài đặt
+                </button>
+                <!-- Permissions sensor button -->
+                <button id="sensorBtn" onclick="requestSensors()" class="bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-md shadow-blue-600/20 transition-all flex items-center gap-1.5">
+                    <i class="fa-solid fa-satellite-dish"></i> Bật Cảm Biến
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 space-y-6">
+
+        <!-- Navigation Tabs -->
+        <div class="flex bg-cardBg border border-cardBorder p-1.5 rounded-2xl shadow-inner max-w-md mx-auto">
+            <button onclick="switchTab('live')" id="tabLive" class="flex-1 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-blue-600 text-white shadow transition-all flex items-center justify-center gap-2">
+                <i class="fa-solid fa-chart-line"></i> Trực Tuyến
+            </button>
+            <button onclick="switchTab('history')" id="tabHistory" class="flex-1 py-2 text-xs sm:text-sm font-semibold rounded-xl text-slate-400 hover:text-white transition-all flex items-center justify-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left"></i> Nhật Ký Chuyến Đi
+            </button>
+            <button onclick="switchTab('settings')" id="tabSettings" class="flex-1 py-2 text-xs sm:text-sm font-semibold rounded-xl text-slate-400 hover:text-white transition-all flex items-center justify-center gap-2">
+                <i class="fa-solid fa-gear"></i> Cài Đặt
+            </button>
+        </div>
+
+        <!-- ================= LIVE VIEW ================= -->
+        <div id="viewLive" class="space-y-6">
+            
+            <!-- Trip Control & Status Bar -->
+            <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
+                    <div>
+                        <span class="text-xs text-slate-400 uppercase tracking-wider">Trạng thái ghi</span>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span id="recordStatusDot" class="w-3 h-3 rounded-full bg-slate-500 inline-block animate-pulse"></span>
+                            <span id="recordStatusText" class="font-bold text-sm text-slate-300">Đang dừng</span>
+                        </div>
+                    </div>
+                    <div class="border-l border-cardBorder pl-4">
+                        <span class="text-xs text-slate-400 uppercase tracking-wider">Thời gian</span>
+                        <div id="tripTimer" class="font-mono font-bold text-lg text-blue-400 mt-0.5">00:00:00</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <button id="toggleRecordBtn" onclick="toggleRecording()" class="flex-1 md:flex-initial bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 text-sm">
+                        <i class="fa-solid fa-play"></i> Bắt đầu ghi chuyến đi
+                    </button>
+                    <button onclick="calibrateSensors()" title="Cân bằng cảm biến khi điện thoại đặt trên xe" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-3 rounded-xl border border-slate-700 text-sm font-medium transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-crosshairs"></i> Cân chỉnh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Score & G-Force Summary Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <!-- Smoothness Score Card -->
+                <div class="bg-cardBg border border-cardBorder rounded-2xl p-5 shadow-xl flex flex-col items-center justify-center text-center relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-emerald-500"></div>
+                    <span class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-2">Điểm Êm Ái (Smoothness)</span>
+                    <div class="relative flex items-center justify-center my-2">
+                        <svg class="w-28 h-28 transform -rotate-90">
+                            <circle cx="56" cy="56" r="46" stroke="currentColor" stroke-width="10" class="text-slate-800 fill-transparent"></circle>
+                            <circle id="scoreCircle" cx="56" cy="56" r="46" stroke="currentColor" stroke-width="10" stroke-dasharray="289" stroke-dashoffset="20" class="text-emerald-500 fill-transparent transition-all duration-500 gauge-ring" stroke-linecap="round"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span id="liveScore" class="text-3xl font-extrabold text-white">100</span>
+                            <span class="text-[10px] text-slate-400">/ 100 điểm</span>
+                        </div>
+                    </div>
+                    <span id="scoreBadgeText" class="text-xs bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full font-medium mt-1">Tuyệt vời êm ái</span>
+                </div>
+
+                <!-- G-Force Accelerate / Brake -->
+                <div class="bg-cardBg border border-cardBorder rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Lực Dọc (Ga / Phanh)</span>
+                        <i class="fa-solid fa-car-side text-blue-400"></i>
+                    </div>
+                    <div class="my-3">
+                        <div class="flex items-baseline justify-between">
+                            <span id="valAccel" class="text-3xl font-extrabold font-mono text-white">0.00</span>
+                            <span class="text-sm text-slate-400">G</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden mt-3 relative">
+                            <div id="barAccel" class="absolute top-0 bottom-0 left-1/2 bg-blue-500 transition-all duration-100 rounded-full" style="width: 0%; transform: translateX(0);"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between text-[11px] text-slate-400">
+                        <span>Phanh gấp (-G)</span>
+                        <span>Tăng tốc (+G)</span>
+                    </div>
+                </div>
+
+                <!-- G-Force Cornering -->
+                <div class="bg-cardBg border border-cardBorder rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Lực Ngang (Vào cua)</span>
+                        <i class="fa-solid fa-route text-purple-400"></i>
+                    </div>
+                    <div class="my-3">
+                        <div class="flex items-baseline justify-between">
+                            <span id="valCorner" class="text-3xl font-extrabold font-mono text-white">0.00</span>
+                            <span class="text-sm text-slate-400">G</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden mt-3 relative">
+                            <div id="barCorner" class="absolute top-0 bottom-0 left-1/2 bg-purple-500 transition-all duration-100 rounded-full" style="width: 0%; transform: translateX(0);"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between text-[11px] text-slate-400">
+                        <span>Trái (-G)</span>
+                        <span>Phải (+G)</span>
+                    </div>
+                </div>
+
+                <!-- Harsh Events Counter -->
+                <div class="bg-cardBg border border-cardBorder rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Cú Giật / Lắc Phát Hiện</span>
+                        <i class="fa-solid fa-triangle-exclamation text-amber-400"></i>
+                    </div>
+                    <div class="my-3 flex items-center justify-between">
+                        <div>
+                            <span id="harshCount" class="text-4xl font-extrabold font-mono text-amber-400">0</span>
+                            <span class="text-xs text-slate-400 ml-1">lần</span>
+                        </div>
+                        <div class="text-right">
+                            <div id="lastEventAlert" class="text-xs text-slate-400 italic">Chưa có sự cố</div>
+                        </div>
+                    </div>
+                    <div class="text-[11px] text-slate-400 border-t border-slate-800 pt-2 flex justify-between">
+                        <span>Ngưỡng cảnh báo:</span>
+                        <span id="currentThresholdDisplay" class="font-mono text-slate-200">0.25 G</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live G-Force Chart Section -->
+            <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 sm:p-6 shadow-xl">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="font-bold text-sm sm:text-base flex items-center gap-2">
+                        <i class="fa-solid fa-chart-area text-blue-400"></i> Biểu đồ Lực G Trực Tuyến
+                    </h2>
+                    <div class="flex items-center gap-3 text-xs">
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> Dọc (Ga/Phanh)</span>
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-purple-500 inline-block"></span> Ngang (Cua)</span>
+                    </div>
+                </div>
+                <div class="h-64 sm:h-80 w-full relative">
+                    <canvas id="gForceChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- ================= HISTORY VIEW ================= -->
+        <div id="viewHistory" class="space-y-6 hidden">
+            <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 sm:p-6 shadow-xl">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="font-bold text-base sm:text-lg flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-blue-400"></i> Lịch sử Chuyến Đi & Phân Tích Lại
+                    </h2>
+                    <button onclick="clearAllHistory()" class="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-semibold px-3 py-1.5 rounded-lg border border-rose-500/30 transition-all">
+                        <i class="fa-solid fa-trash"></i> Xóa tất cả
+                    </button>
+                </div>
+                
+                <div id="tripListContainer" class="space-y-3">
+                    <!-- Dynamically populated trip list -->
+                    <div class="text-center py-12 text-slate-500">
+                        <i class="fa-solid fa-route text-4xl mb-3"></i>
+                        <p>Chưa có chuyến đi nào được lưu.</p>
+                        <p class="text-xs mt-1">Bấm "Bắt đầu ghi chuyến đi" ở tab Trực tuyến để ghi nhận.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trip Replay Modal / Detail Section -->
+            <div id="tripDetailSection" class="bg-cardBg border border-cardBorder rounded-2xl p-4 sm:p-6 shadow-xl hidden space-y-6">
+                <div class="flex items-center justify-between border-b border-cardBorder pb-4">
+                    <div>
+                        <h3 id="replayTitle" class="font-bold text-lg text-white">Chi tiết chuyến đi</h3>
+                        <p id="replaySub" class="text-xs text-slate-400 mt-0.5">Thời gian & Thống kê tổng quan</p>
+                    </div>
+                    <button onclick="closeTripDetail()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-medium transition-all">
+                        <i class="fa-solid fa-xmark"></i> Đóng
+                    </button>
+                </div>
+
+                <!-- Stats summary grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                        <span class="text-[11px] text-slate-400">Điểm êm ái</span>
+                        <div id="replayScore" class="text-xl font-extrabold text-emerald-400 font-mono">95</div>
+                    </div>
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                        <span class="text-[11px] text-slate-400">Thời gian</span>
+                        <div id="replayDuration" class="text-xl font-extrabold text-blue-400 font-mono">05:20</div>
+                    </div>
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                        <span class="text-[11px] text-slate-400">Cú giật / Lắc</span>
+                        <div id="replayHarshCount" class="text-xl font-extrabold text-amber-400 font-mono">2</div>
+                    </div>
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                        <span class="text-[11px] text-slate-400">Lực G cực đại</span>
+                        <div id="replayMaxG" class="text-xl font-extrabold text-purple-400 font-mono">0.34 G</div>
+                    </div>
+                </div>
+
+                <!-- Replay Chart -->
+                <div class="h-64 sm:h-72 w-full relative">
+                    <canvas id="replayChart"></canvas>
+                </div>
+
+                <!-- Timeline Slider & Player Controls -->
+                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-3">
+                    <div class="flex items-center justify-between text-xs text-slate-300">
+                        <span id="sliderTimeLabel">00:00</span>
+                        <span id="sliderProgressInfo">Dòng thời gian chuyến đi</span>
+                        <span id="sliderTotalLabel">05:20</span>
+                    </div>
+                    <input type="range" id="tripTimelineSlider" min="0" max="100" value="0" class="w-full accent-blue-500 cursor-pointer" oninput="onTimelineSliderChange(this.value)">
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ================= SETTINGS VIEW ================= -->
+        <div id="viewSettings" class="space-y-6 hidden">
+            <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 sm:p-6 shadow-xl max-w-2xl mx-auto space-y-6">
+                <h2 class="font-bold text-lg flex items-center gap-2 border-b border-cardBorder pb-3">
+                    <i class="fa-solid fa-sliders text-blue-400"></i> Cài Đặt Ngưỡng & Thông Báo
+                </h2>
+
+                <!-- Threshold settings -->
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-1">
+                            Ngưỡng gia tốc / phanh / cua (G-Force Threshold): <span id="threshValLabel" class="text-blue-400 font-bold">0.25</span> G
+                        </label>
+                        <p class="text-xs text-slate-400 mb-2">Vượt quá ngưỡng này sẽ bị tính là thao tác chưa êm và trừ điểm.</p>
+                        <input type="range" id="thresholdRange" min="0.10" max="0.60" step="0.05" value="0.25" onchange="updateThreshold(this.value)" class="w-full accent-blue-500">
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                        <div>
+                            <span class="font-medium text-sm text-slate-200 block">Thông báo giọng nói tiếng Việt (80% Ngưỡng)</span>
+                            <span class="text-xs text-slate-400">Phát giọng nói cảnh báo khi chạm 80% ngưỡng tối đa</span>
+                        </div>
+                        <input type="checkbox" id="voiceAlertToggle" checked class="w-5 h-5 accent-blue-600 rounded cursor-pointer">
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                        <div>
+                            <span class="font-medium text-sm text-slate-200 block">Âm thanh bíp phụ (Beep)</span>
+                            <span class="text-xs text-slate-400">Phát âm thanh bíp khi vượt 100% ngưỡng</span>
+                        </div>
+                        <input type="checkbox" id="soundAlertToggle" checked class="w-5 h-5 accent-blue-600 rounded cursor-pointer">
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                        <div>
+                            <span class="font-medium text-sm text-slate-200 block">Cảm giác lái xe</span>
+                            <span class="text-xs text-slate-400">Chế độ tối ưu cho người ngồi sau đỡ say xe</span>
+                        </div>
+                        <select id="drivingModeSelect" class="bg-slate-800 border border-slate-700 text-xs text-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-500">
+                            <option value="sedan">Xe Gia Đình / Sedan (Êm ái tối đa)</option>
+                            <option value="suv">Xe Gầm Cao / SUV</option>
+                            <option value="sport">Thể Thao / Năng động</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="border-t border-cardBorder pt-4 flex justify-end gap-3">
+                    <button onclick="saveSettings()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-5 py-2.5 rounded-xl shadow transition-all">
+                        <i class="fa-solid fa-check"></i> Lưu cài đặt
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Custom Modal Message Box -->
+    <div id="customModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-cardBg border border-cardBorder rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <h3 id="modalTitle" class="font-bold text-lg text-white flex items-center gap-2">
+                <i class="fa-solid fa-circle-info text-blue-400"></i> Thông báo
+            </h3>
+            <p id="modalMessage" class="text-sm text-slate-300 leading-relaxed">Nội dung thông báo...</p>
+            <div class="flex justify-end pt-2">
+                <button onclick="closeModal()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-5 py-2.5 rounded-xl transition-all">
+                    Đã hiểu
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ================= JAVASCRIPT LOGIC ================= -->
+    <script>
+        // --- Service Worker Registration with Network First Strategy ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const swCode = `
+                    const CACHE_NAME = 'smoothdrive-v2';
+                    const urlsToCache = ['./', 'index.html'];
+                    
+                    self.addEventListener('install', event => {
+                        event.waitUntil(
+                            caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+                        );
+                        self.skipWaiting();
+                    });
+
+                    self.addEventListener('activate', event => {
+                        event.waitUntil(
+                            caches.keys().then(keys => Promise.all(
+                                keys.map(key => { if (key !== CACHE_NAME) return caches.delete(key); })
+                            ))
+                        );
+                        self.clients.claim();
+                    });
+
+                    // Network First Strategy
+                    self.addEventListener('fetch', event => {
+                        event.respondWith(
+                            fetch(event.request)
+                                .then(response => {
+                                    if(!response || response.status !== 200 || response.type !== 'basic') {
+                                        return response;
+                                    }
+                                    const responseToCache = response.clone();
+                                    caches.open(CACHE_NAME).then(cache => {
+                                        cache.put(event.request, responseToCache);
+                                    });
+                                    return response;
+                                })
+                                .catch(() => caches.match(event.request))
+                        );
+                    });
+                `;
+                const blob = new Blob([swCode], { type: 'application/javascript' });
+                const swUrl = URL.createObjectURL(blob);
+                navigator.serviceWorker.register(swUrl)
+                    .then(() => console.log('PWA ServiceWorker registered with Network First strategy.'))
+                    .catch(err => console.log('SW registration failed:', err));
+            });
+        }
+
+        // --- PWA Install Prompt ---
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installBtn').classList.remove('hidden');
+            document.getElementById('installBtn').classList.add('flex');
+        });
+
+        document.getElementById('installBtn').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    document.getElementById('installBtn').classList.add('hidden');
+                }
+                deferredPrompt = null;
+            }
+        });
+
+        // --- App State & Variables ---
+        let currentTab = 'live';
+        let isRecording = false;
+        let tripStartTime = null;
+        let tripTimerInterval = null;
+        let currentTripData = [];
+        let tripDurationSeconds = 0;
+        let harshCount = 0;
+        let currentScore = 100;
+
+        let thresholdG = 0.25;
+        let soundEnabled = true;
+        let voiceAlertEnabled = true;
+        let lastVoiceWarningTime = 0; // Throttle to prevent overlapping speech announcements
+
+        // Sensor Calibration offsets
+        let calOffsetAccelX = 0;
+        let calOffsetAccelY = 0;
+
+        // Chart.js instances
+        let liveChart = null;
+        let replayChart = null;
+        const maxChartPoints = 60; // 60 data points (approx 60 seconds of history)
+
+        // Web Speech API - Vietnamese Speech Synthesis
+        function speakVietnameseWarning(text) {
+            if (!voiceAlertEnabled) return;
+            if (!('speechSynthesis' in window)) return;
+
+            // Throttle: don't speak more than once every 4 seconds to avoid driver distraction
+            const now = Date.now();
+            if (now - lastVoiceWarningTime < 4000) return;
+            lastVoiceWarningTime = now;
+
+            try {
+                window.speechSynthesis.cancel(); // Stop any pending speech
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'vi-VN';
+                utterance.rate = 1.0;
+                utterance.pitch = 1.0;
+                window.speechSynthesis.speak(utterance);
+            } catch (e) {
+                console.error("Speech synthesis error:", e);
+            }
+        }
+
+        // Audio Beep generator using Web Audio API
+        let audioCtx = null;
+        function playBeep() {
+            if (!soundEnabled) return;
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5 note
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.15);
+            } catch (e) {
+                console.error("Audio beep error:", e);
+            }
+        }
+
+        // --- UI Modal Helper ---
+        function showModal(title, msg) {
+            document.getElementById('modalTitle').innerHTML = `<i class="fa-solid fa-circle-info text-blue-400"></i> ${title}`;
+            document.getElementById('modalMessage').innerText = msg;
+            document.getElementById('customModal').classList.remove('hidden');
+        }
+        function closeModal() {
+            document.getElementById('customModal').classList.add('hidden');
+        }
+
+        // --- Tabs Switching ---
+        function switchTab(tabId) {
+            currentTab = tabId;
+            ['live', 'history', 'settings'].forEach(t => {
+                document.getElementById(`view${t.charAt(0).toUpperCase() + t.slice(1)}`).classList.add('hidden');
+                document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`).className = "flex-1 py-2 text-xs sm:text-sm font-semibold rounded-xl text-slate-400 hover:text-white transition-all flex items-center justify-center gap-2";
+            });
+            document.getElementById(`view${tabId.charAt(0).toUpperCase() + tabId.slice(1)}`).classList.remove('hidden');
+            document.getElementById(`tab${tabId.charAt(0).toUpperCase() + tabId.slice(1)}`).className = "flex-1 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-blue-600 text-white shadow transition-all flex items-center justify-center gap-2";
+
+            if (tabId === 'history') {
+                renderTripHistoryList();
+            }
+        }
+
+        // --- Initialize Live Chart ---
+        function initLiveChart() {
+            const ctx = document.getElementById('gForceChart').getContext('2d');
+            const initialLabels = Array(maxChartPoints).fill('');
+            const initialAccel = Array(maxChartPoints).fill(0);
+            const initialCorner = Array(maxChartPoints).fill(0);
+
+            liveChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: initialLabels,
+                    datasets: [
+                        {
+                            label: 'Lực Dọc (Ga/Phanh)',
+                            data: initialAccel,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'Lực Ngang (Cua)',
+                            data: initialCorner,
+                            borderColor: '#a855f7',
+                            backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false,
+                    scales: {
+                        y: {
+                            min: -1.0,
+                            max: 1.0,
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#94a3b8', font: { size: 10 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        // --- Sensor Permission & Handling ---
+        async function requestSensors() {
+            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                try {
+                    const response = await DeviceMotionEvent.requestPermission();
+                    if (response === 'granted') {
+                        window.addEventListener('devicemotion', handleMotionData);
+                        showModal("Thành công", "Đã cấp quyền truy cập cảm biến gia tốc chuyển động.");
+                    } else {
+                        showModal("Từ chối", "Bạn đã từ chối quyền truy cập cảm biến chuyển động.");
+                    }
+                } catch (e) {
+                    showModal("Lỗi", "Không thể yêu cầu quyền cảm biến: " + e.message);
+                }
+            } else if ('DeviceMotionEvent' in window) {
+                window.addEventListener('devicemotion', handleMotionData);
+                showModal("Sẵn sàng", "Cảm biến chuyển động đã được kích hoạt trực tiếp.");
+            } else {
+                showModal("Không hỗ trợ", "Trình duyệt hoặc thiết bị của bạn không hỗ trợ cảm biến chuyển động.");
+            }
+        }
+
+        // Calibration
+        let rawAccelXBuffer = 0;
+        let rawAccelYBuffer = 0;
+        function calibrateSensors() {
+            calOffsetAccelX = rawAccelXBuffer;
+            calOffsetAccelY = rawAccelYBuffer;
+            showModal("Đã cân chỉnh", "Đã ghi nhận vị thế cân bằng hiện tại của thiết bị trên xe.");
+        }
+
+        // Motion Processing
+        let lastUpdateTime = Date.now();
+        function handleMotionData(event) {
+            const now = Date.now();
+            if (now - lastUpdateTime < 100) return; // Throttle to 10fps for smooth rendering
+            lastUpdateTime = now;
+
+            const accel = event.accelerationIncludingGravity || event.acceleration;
+            if (!accel) return;
+
+            const g = 9.81;
+            rawAccelXBuffer = (accel.x || 0) / g;
+            rawAccelYBuffer = (accel.y || 0) / g;
+
+            let lateralG = ((accel.x || 0) / g) - calOffsetAccelX;
+            let longitudinalG = ((accel.y || 0) / g) - calOffsetAccelY;
+
+            updateTelemetryUI(longitudinalG, lateralG);
+
+            if (isRecording) {
+                currentTripData.push({
+                    time: tripDurationSeconds,
+                    accel: Number(longitudinalG.toFixed(2)),
+                    corner: Number(lateralG.toFixed(2))
+                });
+            }
+        }
+
+        // --- Update Live Telemetry UI & Charts ---
+        function updateTelemetryUI(longitudinalG, lateralG) {
+            document.getElementById('valAccel').innerText = longitudinalG.toFixed(2);
+            document.getElementById('valCorner').innerText = lateralG.toFixed(2);
+
+            const accelPct = Math.min(Math.max((longitudinalG / 1.0) * 50, -50), 50);
+            const cornerPct = Math.min(Math.max((lateralG / 1.0) * 50, -50), 50);
+
+            const barAccel = document.getElementById('barAccel');
+            if (accelPct >= 0) {
+                barAccel.style.left = '50%';
+                barAccel.style.width = `${accelPct}%`;
+                barAccel.style.backgroundColor = '#3b82f6';
+            } else {
+                barAccel.style.left = `${50 + accelPct}%`;
+                barAccel.style.width = `${Math.abs(accelPct)}%`;
+                barAccel.style.backgroundColor = '#ef4444';
+            }
+
+            const barCorner = document.getElementById('barCorner');
+            if (cornerPct >= 0) {
+                barCorner.style.left = '50%';
+                barCorner.style.width = `${cornerPct}%`;
+                barCorner.style.backgroundColor = '#a855f7';
+            } else {
+                barCorner.style.left = `${50 + cornerPct}%`;
+                barCorner.style.width = `${Math.abs(cornerPct)}%`;
+                barCorner.style.backgroundColor = '#ec4899';
+            }
+
+            const absLong = Math.abs(longitudinalG);
+            const absLat = Math.abs(lateralG);
+
+            // Check 80% threshold for Vietnamese Voice Warning
+            const warningLimit = thresholdG * 0.8;
+            if (absLong >= warningLimit || absLat >= warningLimit) {
+                speakVietnameseWarning("Giảm cường độ lại, tăng tốc, phanh hoặc vào cua quá mạnh!");
+            }
+
+            // Check 100% threshold for harsh event and score deduction
+            if (absLong > thresholdG || absLat > thresholdG) {
+                if (isRecording) {
+                    harshCount++;
+                    document.getElementById('harshCount').innerText = harshCount;
+                    document.getElementById('lastEventAlert').innerText = `Vượt ngưỡng lúc ${formatTimer(tripDurationSeconds)}`;
+                    playBeep();
+                    
+                    currentScore = Math.max(0, currentScore - 2);
+                    updateScoreUI();
+                }
+            }
+
+            // Update Live Chart
+            if (liveChart) {
+                liveChart.data.datasets[0].data.push(longitudinalG);
+                liveChart.data.datasets[1].data.push(lateralG);
+                liveChart.data.datasets[0].data.shift();
+                liveChart.data.datasets[1].data.shift();
+                liveChart.update('none');
+            }
+        }
+
+        function updateScoreUI() {
+            document.getElementById('liveScore').innerText = currentScore;
+            const circle = document.getElementById('scoreCircle');
+            const circumference = 2 * Math.PI * 46;
+            const offset = circumference - (currentScore / 100) * circumference;
+            circle.style.strokeDashoffset = offset;
+
+            const badge = document.getElementById('scoreBadgeText');
+            if (currentScore >= 90) {
+                circle.className = "text-emerald-500 fill-transparent transition-all duration-500 gauge-ring";
+                badge.className = "text-xs bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full font-medium mt-1";
+                badge.innerText = "Tuyệt vời êm ái";
+            } else if (currentScore >= 70) {
+                circle.className = "text-blue-500 fill-transparent transition-all duration-500 gauge-ring";
+                badge.className = "text-xs bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full font-medium mt-1";
+                badge.innerText = "Khá ổn định";
+            } else {
+                circle.className = "text-amber-500 fill-transparent transition-all duration-500 gauge-ring";
+                badge.className = "text-xs bg-amber-500/20 text-amber-400 px-3 py-1 rounded-full font-medium mt-1";
+                badge.innerText = "Cần lái mượt mà hơn";
+            }
+        }
+
+        // --- Recording & Timer Logic ---
+        function toggleRecording() {
+            isRecording = !isRecording;
+            const btn = document.getElementById('toggleRecordBtn');
+            const statusDot = document.getElementById('recordStatusDot');
+            const statusText = document.getElementById('recordStatusText');
+
+            if (isRecording) {
+                currentTripData = [];
+                tripDurationSeconds = 0;
+                harshCount = 0;
+                currentScore = 100;
+                document.getElementById('harshCount').innerText = '0';
+                updateScoreUI();
+
+                btn.innerHTML = `<i class="fa-solid fa-stop"></i> Kết thúc & Lưu chuyến đi`;
+                btn.className = "flex-1 md:flex-initial bg-rose-600 hover:bg-rose-500 active:scale-95 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-rose-600/30 transition-all flex items-center justify-center gap-2 text-sm";
+                statusDot.className = "w-3 h-3 rounded-full bg-emerald-500 inline-block animate-ping";
+                statusText.innerText = "Đang ghi hình trình...";
+                statusText.className = "font-bold text-sm text-emerald-400";
+
+                tripStartTime = new Date();
+                tripTimerInterval = setInterval(() => {
+                    tripDurationSeconds++;
+                    document.getElementById('tripTimer').innerText = formatTimer(tripDurationSeconds);
+                }, 1000);
+
+            } else {
+                clearInterval(tripTimerInterval);
+                btn.innerHTML = `<i class="fa-solid fa-play"></i> Bắt đầu ghi chuyến đi`;
+                btn.className = "flex-1 md:flex-initial bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 text-sm";
+                statusDot.className = "w-3 h-3 rounded-full bg-slate-500 inline-block";
+                statusText.innerText = "Đang dừng";
+                statusText.className = "font-bold text-sm text-slate-300";
+
+                if (currentTripData.length > 5) {
+                    saveTripToStorage({
+                        id: Date.now(),
+                        date: tripStartTime.toLocaleString('vi-VN'),
+                        duration: tripDurationSeconds,
+                        score: currentScore,
+                        harshCount: harshCount,
+                        data: currentTripData
+                    });
+                    showModal("Đã lưu", "Chuyến đi của bạn đã được ghi lại và chấm điểm thành công!");
+                } else {
+                    showModal("Thông báo", "Thời gian chuyến đi quá ngắn, không lưu lại.");
+                }
+            }
+        }
+
+        function formatTimer(totalSecs) {
+            const hrs = Math.floor(totalSecs / 3600).toString().padStart(2, '0');
+            const mins = Math.floor((totalSecs % 3600) / 60).toString().padStart(2, '0');
+            const secs = (totalSecs % 60).toString().padStart(2, '0');
+            return `${hrs}:${mins}:${secs}`;
+        }
+
+        // --- LocalStorage Trip Management ---
+        function getTripsFromStorage() {
+            try {
+                const data = localStorage.getItem('smoothdrive_trips');
+                return data ? JSON.parse(data) : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveTripToStorage(trip) {
+            const trips = getTripsFromStorage();
+            trips.unshift(trip);
+            localStorage.setItem('smoothdrive_trips', JSON.stringify(trips));
+        }
+
+        function clearAllHistory() {
+            if (confirm("Bạn có chắc chắn muốn xóa tất cả lịch sử chuyến đi?")) {
+                localStorage.removeItem('smoothdrive_trips');
+                renderTripHistoryList();
+                document.getElementById('tripDetailSection').classList.add('hidden');
+            }
+        }
+
+        function renderTripHistoryList() {
+            const container = document.getElementById('tripListContainer');
+            const trips = getTripsFromStorage();
+
+            if (trips.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-slate-500">
+                        <i class="fa-solid fa-route text-4xl mb-3"></i>
+                        <p>Chưa có chuyến đi nào được lưu.</p>
+                        <p class="text-xs mt-1">Bắt đầu ghi chuyến đi ở tab Trực tuyến.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            trips.forEach((trip, idx) => {
+                let badgeColor = trip.score >= 90 ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : (trip.score >= 70 ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'bg-amber-500/20 text-amber-400 border-amber-500/30');
+                html += `
+                    <div class="bg-slate-900/60 border border-slate-800 hover:border-slate-700 p-4 rounded-xl flex items-center justify-between transition-all">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-blue-600/20 text-blue-400 p-3 rounded-xl border border-blue-500/30">
+                                <i class="fa-solid fa-car"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sm text-white">Chuyến đi #${trips.length - idx}</h4>
+                                <p class="text-xs text-slate-400">${trip.date} • Thời gian: ${formatTimer(trip.duration)}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="text-right">
+                                <span class="text-xs px-2.5 py-1 rounded-full border font-bold ${badgeColor}">${trip.score} điểm</span>
+                                <span class="block text-[10px] text-slate-400 mt-1">${trip.harshCount} lần giật</span>
+                            </div>
+                            <button onclick="openTripDetail(${trip.id})" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg text-xs font-semibold shadow transition-all">
+                                <i class="fa-solid fa-chart-line"></i> Xem
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // --- Trip Replay & Timeline Slider ---
+        let selectedTrip = null;
+        function openTripDetail(tripId) {
+            const trips = getTripsFromStorage();
+            selectedTrip = trips.find(t => t.id === tripId);
+            if (!selectedTrip) return;
+
+            document.getElementById('tripDetailSection').classList.remove('hidden');
+            document.getElementById('replayTitle').innerText = `Chi tiết chuyến đi (${selectedTrip.date})`;
+            document.getElementById('replaySub').innerText = `Tổng thời lượng: ${formatTimer(selectedTrip.duration)}`;
+            document.getElementById('replayScore').innerText = selectedTrip.score;
+            document.getElementById('replayDuration').innerText = formatTimer(selectedTrip.duration);
+            document.getElementById('replayHarshCount').innerText = selectedTrip.harshCount;
+
+            let maxG = 0;
+            selectedTrip.data.forEach(d => {
+                if (Math.abs(d.accel) > maxG) maxG = Math.abs(d.accel);
+                if (Math.abs(d.corner) > maxG) maxG = Math.abs(d.corner);
+            });
+            document.getElementById('replayMaxG').innerText = maxG.toFixed(2) + ' G';
+
+            const slider = document.getElementById('tripTimelineSlider');
+            slider.max = selectedTrip.data.length - 1;
+            slider.value = 0;
+            document.getElementById('sliderTotalLabel').innerText = formatTimer(selectedTrip.duration);
+            document.getElementById('sliderTimeLabel').innerText = formatTimer(0);
+
+            initReplayChart(selectedTrip.data);
+            window.scrollTo({ top: document.getElementById('tripDetailSection').offsetTop, behavior: 'smooth' });
+        }
+
+        function closeTripDetail() {
+            document.getElementById('tripDetailSection').classList.add('hidden');
+            selectedTrip = null;
+        }
+
+        function initReplayChart(dataPoints) {
+            const ctx = document.getElementById('replayChart').getContext('2d');
+            if (replayChart) replayChart.destroy();
+
+            const labels = dataPoints.map(d => formatTimer(d.time));
+            const accelData = dataPoints.map(d => d.accel);
+            const cornerData = dataPoints.map(d => d.corner);
+
+            replayChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Lực Dọc (Ga/Phanh)',
+                            data: accelData,
+                            borderColor: '#3b82f6',
+                            borderWidth: 2,
+                            tension: 0.2,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'Lực Ngang (Cua)',
+                            data: cornerData,
+                            borderColor: '#a855f7',
+                            borderWidth: 2,
+                            tension: 0.2,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            min: -1.0,
+                            max: 1.0,
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#94a3b8', font: { size: 10 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8', maxTicksLimit: 8, font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function onTimelineSliderChange(val) {
+            if (!selectedTrip || !replayChart) return;
+            const index = parseInt(val);
+            const point = selectedTrip.data[index];
+            if (point) {
+                document.getElementById('sliderTimeLabel').innerText = formatTimer(point.time);
+            }
+        }
+
+        // --- Settings handlers ---
+        function updateThreshold(val) {
+            thresholdG = parseFloat(val);
+            document.getElementById('threshValLabel').innerText = thresholdG.toFixed(2);
+            document.getElementById('currentThresholdDisplay').innerText = thresholdG.toFixed(2) + ' G';
+        }
+
+        function saveSettings() {
+            soundEnabled = document.getElementById('soundAlertToggle').checked;
+            voiceAlertEnabled = document.getElementById('voiceAlertToggle').checked;
+            thresholdG = parseFloat(document.getElementById('thresholdRange').value);
+            showModal("Đã lưu", "Cài đặt ngưỡng và thông báo đã được áp dụng thành công.");
+        }
+
+        // --- Initial Load ---
+        window.addEventListener('DOMContentLoaded', () => {
+            initLiveChart();
+            updateScoreUI();
+        });
+    
+
+    if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+              .then((reg) => {
+                console.log('Service Worker đăng ký thành công với scope:', reg.scope);
+              })
+              .catch((err) => {
+                console.error('Đăng ký Service Worker thất bại:', err);
+              });
+          });
+        }
+
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "name": "Hỗ trợ lái xe",
+  "short_name": "DriveSmooth",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "orientation": "portrait",
+  "description": "Ứng dụng phân tích lực G, chấm điểm lái xe êm ái và cảnh báo bằng giọng nói tiếng Việt.",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/18307/18307152.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

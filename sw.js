@@ -71,27 +71,42 @@ self.addEventListener('message', (event) => {
 });
 
 // Chiến lược Network First (Ưu tiên mạng, rớt mạng dùng Cache)
+// Sự kiện Fetch: Tự động cập nhật file HTML ngay lập tức mà không cần tăng version sw.js
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
+  const url = new URL(event.request.url);
+
+  // 1. Đối với file index.html hoặc trang chủ: Luôn ưu tiên lấy MẠNG TRƯỚC (Network First)
+  // Nếu mất mạng mới lấy bản Cache cũ. Nhờ vậy bạn sửa index.html trên GitHub là app nhận luôn.
+  if (url.pathname.endsWith('/') || url.pathname.endsWith('index.html')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const cloned = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, cloned));
+          }
+          return networkResponse;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // 2. Đối với các file khác (sounds.json, file mp3, icon...): Dùng chiến lược Cache trước, ngầm cập nhật sau
   event.respondWith(
-    fetch(event.request)
-      .then((networkResponse) => {
+    caches.match(event.request).then((cachedResponse) => {
+      const fetchPromise = fetch(event.request).then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200) {
           const cloned = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, cloned);
-          });
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, cloned));
         }
         return networkResponse;
-      })
-      .catch(() => {
-        return caches.match(event.request).then((cachedResponse) => {
-          if (cachedResponse) return cachedResponse;
-          if (event.request.headers.get('accept')?.includes('text/html')) {
-            return caches.match('./index.html');
-          }
-        });
-      })
+      }).catch(() => {});
+
+      // Trả về cache ngay lập tức cho mượt, đồng thời ngầm tải bản mới về cho lần sau
+      return cachedResponse || fetchPromise;
+    })
   );
 });

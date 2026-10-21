@@ -463,15 +463,13 @@
 <body>
   <div class="app-container">
     <!-- HÀNG 1: TRẠNG THÁI ĐỘ DỐC & NÚT CHỨC NĂNG -->
+    <!-- HÀNG 1: TRẠNG THÁI ĐỘ DỐC & NÚT CÀI ĐẶT -->
     <div class="top-bar">
       <div id="slopeBadge" class="slope-badge">
         <span>⛰️</span>
         <span id="slopeText">Đường bằng (0°)</span>
       </div>
       <div class="top-actions">
-        <button id="btnCalibrate" class="btn-icon" title="Đặt lại vị trí cân bằng 0G">
-          🎯 Cân chỉnh
-        </button>
         <button id="btnSettings" class="btn-icon" title="Mở cài đặt">
           ⚙️
         </button>
@@ -543,15 +541,15 @@
     </div>
 
     <!-- HÀNG 4: NÚT BẮT ĐẦU & CHẾ ĐỘ THỬ NGHIỆM -->
+    <!-- HÀNG 4: NÚT BẮT ĐẦU KÊM CÂN CHỈNH & CHẾ ĐỘ THỬ -->
     <div class="bottom-bar">
       <button id="btnStart" class="btn-main">
-        <span>▶ BẮT ĐẦU LÁI XE</span>
+        <span>🎯 CÂN CHỈNH & BẮT ĐẦU</span>
       </button>
       <button id="btnTestMode" class="btn-test-mode active" title="Khi bật: Cho phép kêu cảnh báo ngay cả khi xe đứng yên 0 km/h">
         Thử tại chỗ:<br><strong id="testModeState">ĐANG BẬT</strong>
       </button>
     </div>
-  </div>
 
   <!-- POPUP CÀI ĐẶT -->
   <div id="settingsModal" class="modal-overlay">
@@ -1044,66 +1042,80 @@
      * 5. SỰ KIỆN NÚT BẤM & KHỞI ĐỘNG
      **************************************************************/
     const btnStart = document.getElementById('btnStart');
-    const btnCalibrate = document.getElementById('btnCalibrate');
+    // const btnCalibrate = document.getElementById('btnCalibrate');
     const btnTestMode = document.getElementById('btnTestMode');
 
-    btnStart.addEventListener('click', async () => {
-      initAudioContext();
-      await loadSoundsFromConfig();
+    const btnStart = document.getElementById('btnStart');
+const btnTestMode = document.getElementById('btnTestMode');
 
-      if (!isRunning) {
-        // Xin quyền cảm biến trên iOS 13+
-        if (
-          typeof DeviceMotionEvent !== 'undefined' &&
-          typeof DeviceMotionEvent.requestPermission === 'function'
-        ) {
-          try {
-            const state = await DeviceMotionEvent.requestPermission();
-            if (state !== 'granted') {
-              alert('Bạn cần cấp quyền Cảm biến chuyển động để đo lực G!');
-              return;
-            }
-          } catch (e) {}
+btnStart.addEventListener('click', async () => {
+  initAudioContext();
+  await loadSoundsFromConfig();
+
+  if (!isRunning) {
+    // Xin quyền cảm biến trên iOS 13+
+    if (
+      typeof DeviceMotionEvent !== 'undefined' &&
+      typeof DeviceMotionEvent.requestPermission === 'function'
+    ) {
+      try {
+        const state = await DeviceMotionEvent.requestPermission();
+        if (state !== 'granted') {
+          alert('Bạn cần cấp quyền Cảm biến chuyển động để đo lực G!');
+          return;
         }
+      } catch (e) {}
+    }
 
-        isRunning = true;
-        prevTimestamp = performance.now();
-        window.addEventListener('devicemotion', handleMotion);
-        startBackgroundGPS();
-        requestWakeLock();
+    // === TỰ ĐỘNG CÂN CHỈNH NGAY LẬP TỨC TRƯỚC KHI BẮT ĐẦU ===
+    manualOffset.x = rawSensor.x;
+    manualOffset.y = rawSensor.y;
+    slopeBaseline.x = 0;
+    slopeBaseline.y = 0;
+    smoothG.x = 0;
+    smoothG.y = 0;
 
-        btnStart.classList.add('running');
-        btnStart.innerHTML = '<span>⏹ DỪNG LẠI</span>';
-        document.getElementById('alertTitle').textContent = 'ĐANG THEO DÕI';
-        document.getElementById('alertSub').textContent = 'Đặt cố định điện thoại trên xe';
-      } else {
-        isRunning = false;
-        window.removeEventListener('devicemotion', handleMotion);
-        stopBackgroundGPS();
-        if (wakeLock) {
-          wakeLock.release().catch(() => {});
-          wakeLock = null;
-        }
+    // Kích hoạt chạy cảm biến & GPS ngầm
+    isRunning = true;
+    prevTimestamp = performance.now();
+    window.addEventListener('devicemotion', handleMotion);
+    startBackgroundGPS();
+    requestWakeLock();
 
-        btnStart.classList.remove('running');
-        btnStart.innerHTML = '<span>▶ BẮT ĐẦU LÁI XE</span>';
-        document.getElementById('alertBanner').className = 'alert-banner';
-        document.getElementById('alertTitle').textContent = 'ĐÃ TẠM DỪNG';
-        document.getElementById('alertSub').textContent = 'Bấm Bắt đầu để tiếp tục';
-      }
-    });
+    // Đổi giao diện nút thành Dừng
+    btnStart.classList.add('running');
+    btnStart.innerHTML = '<span>⏹ DỪNG LẠI</span>';
+    document.getElementById('alertTitle').textContent = 'ĐANG THEO DÕI';
+    document.getElementById('alertSub').textContent = 'Đã cân chỉnh 0G - Xe bắt đầu lăn bánh';
+  } else {
+    // Dừng lại
+    isRunning = false;
+    window.removeEventListener('devicemotion', handleMotion);
+    stopBackgroundGPS();
+    if (wakeLock) {
+      wakeLock.release().catch(() => {});
+      wakeLock = null;
+    }
+
+    btnStart.classList.remove('running');
+    btnStart.innerHTML = '<span>🎯 CÂN CHỈNH & BẮT ĐẦU</span>';
+    document.getElementById('alertBanner').className = 'alert-banner';
+    document.getElementById('alertTitle').textContent = 'ĐÃ TẠM DỪNG';
+    document.getElementById('alertSub').textContent = 'Bấm nút dưới để cân chỉnh & chạy lại';
+  }
+});
 
     // Nút Cân chỉnh 0G tức thì
-    btnCalibrate.addEventListener('click', () => {
-      manualOffset.x = rawSensor.x;
-      manualOffset.y = rawSensor.y;
-      slopeBaseline.x = 0;
-      slopeBaseline.y = 0;
-      smoothG.x = 0;
-      smoothG.y = 0;
-      document.getElementById('alertTitle').textContent = 'ĐÃ CÂN CHỈNH TÂM 0G';
-      document.getElementById('alertSub').textContent = 'Đã lấy góc đặt máy hiện tại làm chuẩn';
-    });
+    // btnCalibrate.addEventListener('click', () => {
+    //   manualOffset.x = rawSensor.x;
+    //   manualOffset.y = rawSensor.y;
+    //   slopeBaseline.x = 0;
+    //   slopeBaseline.y = 0;
+    //   smoothG.x = 0;
+    //   smoothG.y = 0;
+    //   document.getElementById('alertTitle').textContent = 'ĐÃ CÂN CHỈNH TÂM 0G';
+    //   document.getElementById('alertSub').textContent = 'Đã lấy góc đặt máy hiện tại làm chuẩn';
+    // });
 
     // Nút bật/tắt chế độ thử tại chỗ
     function renderTestModeButton() {

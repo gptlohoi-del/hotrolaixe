@@ -21,6 +21,23 @@
       --yellow: #f59e0b;
       --red: #ef4444;
       --blue: #38bdf8;
+      --bar-bg: #090d16;
+      --bar-border: #1e293b;
+    }
+
+    /* Giao diện Sáng (Light Mode) */
+    [data-theme="light"] {
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --border: #cbd5e1;
+      --text: #0f172a;
+      --subtext: #64748b;
+      --green: #059669;
+      --yellow: #d97706;
+      --red: #dc2626;
+      --blue: #0284c7;
+      --bar-bg: #e2e8f0;
+      --bar-border: #cbd5e1;
     }
 
     * {
@@ -293,11 +310,11 @@
     .bar-track {
       width: 100%;
       height: 16px;
-      background: #090d16;
+      background: var(--bar-bg); /* Thay màu cứng bằng biến --bar-bg */
       border-radius: 8px;
       position: relative;
       overflow: hidden;
-      border: 1px solid #1e293b;
+      border: 1px solid var(--bar-border); /* Thay màu cứng bằng biến --bar-border */
     }
 
     .bar-mark-80 {
@@ -609,6 +626,18 @@
         </div>
       </div>
 
+      <!-- THÊM MỤC CHỌN GIAO DIỆN Ở ĐÂY -->
+      <div class="setting-group">
+        <div class="setting-label">
+          <span>Chế độ giao diện</span>
+          <span id="lblThemeName">Tối (Dark)</span>
+        </div>
+        <div class="sound-test-grid">
+          <button class="btn-sound" id="btnThemeDark" style="background: #0b1120; color: #fff;">🌙 Giao diện Tối</button>
+          <button class="btn-sound" id="btnThemeLight" style="background: #f8fafc; color: #0f172a; border: 1px solid #cbd5e1;">☀️ Giao diện Sáng</button>
+        </div>
+      </div>
+
       <button id="btnReloadSounds" class="btn-update-cache">
         🔄 Tải lại sounds.json & MP3 mới từ GitHub
       </button>
@@ -617,6 +646,8 @@
   </div>
 
   <script>
+
+
     /**************************************************************
      * 1. ĐĂNG KÝ SERVICE WORKER (NETWORK FIRST)
      **************************************************************/
@@ -1188,6 +1219,41 @@ btnStart.addEventListener('click', async () => {
       }
       await loadSoundsFromConfig();
     });
+
+
+    const defaultConfig = {
+      maxGa: 0.25,
+      maxPhanh: 0.28,
+      maxCua: 0.25,
+      maxJerk: 0.35,
+      cooldown: 3.0,
+      testMode: true,
+      theme: 'dark' // Thêm dòng này
+    };
+
+    function applyTheme(themeName) {
+      if (themeName === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+        document.getElementById('lblThemeName').textContent = 'Sáng (Light)';
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        document.getElementById('lblThemeName').textContent = 'Tối (Dark)';
+      }
+      config.theme = themeName;
+      saveConfig();
+    }
+
+    // Gọi hàm này ngay khi tải trang để giữ đúng giao diện người dùng đã chọn
+    applyTheme(config.theme);
+
+    document.getElementById('btnThemeDark').addEventListener('click', () => {
+      applyTheme('dark');
+    });
+
+    document.getElementById('btnThemeLight').addEventListener('click', () => {
+      applyTheme('light');
+    });
+
   </script>
 </body>
 </html>

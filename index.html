@@ -251,12 +251,12 @@
     .cup-wrapper {
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start; /* Dịch sang sát cạnh trái */
+      padding-left: 8px; /* Khoảng cách cách mép trái một chút cho đẹp */
       position: relative;
       flex: 1;
       min-height: 115px;
       max-height: 210px;
-      padding: 4px 0;
     }
 
     .cup-circle {
@@ -320,10 +320,10 @@
     .cup-readout {
       position: absolute;
       bottom: 2px;
-      right: 4px;
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--subtext);
+      left: 0px; /* Hoặc căn giữa nếu bạn dùng cách 1 trước đó */
+      font-size: 18px;     /* Tăng kích thước chữ từ 11px lên 16px (hoặc 18px tùy ý bạn) */
+      font-weight: 900;    /* In đậm tối đa (900 là cực kỳ đậm) */
+      color: var(--text);  /* Đổi sang màu chữ chính để hiển thị sắc nét hơn */
       font-family: monospace;
     }
 
@@ -354,7 +354,7 @@
 
     .bar-track {
       width: 100%;
-      height: 15px;
+      height: 30px;
       background: var(--bar-bg);
       border-radius: 8px;
       position: relative;

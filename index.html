@@ -215,9 +215,10 @@
     }
 
     .alert-title {
-      font-size: 18px;
-      font-weight: 800;
+      font-size: 20px;
+      font-weight: 900;
       letter-spacing: 0.2px;
+      line-height: 1.15;
     }
 
     .alert-sub {
@@ -247,12 +248,12 @@
       min-height: 0;
     }
 
-    /* Cốc nước G-Force */
+    /* Cốc nước G-Force nằm sát cạnh trái */
     .cup-wrapper {
       display: flex;
       align-items: center;
-      justify-content: flex-start; /* Dịch sang sát cạnh trái */
-      padding-left: 8px; /* Khoảng cách cách mép trái một chút cho đẹp */
+      justify-content: flex-start;
+      padding-left: 8px;
       position: relative;
       flex: 1;
       min-height: 115px;
@@ -275,10 +276,10 @@
       box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.06);
     }
 
-    /* Vòng Ngưỡng 2 (Mặc định 80%) */
+    /* Vòng Ngưỡng 2 */
     .cup-ring-lvl2 {
-      width: 80%;
-      height: 80%;
+      width: 85%;
+      height: 85%;
       border-radius: 50%;
       border: 1.5px dashed var(--orange);
       position: absolute;
@@ -286,7 +287,7 @@
       transition: width 0.2s, height 0.2s;
     }
 
-    /* Vòng Ngưỡng 1 (Mặc định 70%) */
+    /* Vòng Ngưỡng 1 */
     .cup-ring-lvl1 {
       width: 70%;
       height: 70%;
@@ -317,14 +318,25 @@
       z-index: 2;
     }
 
+    /* Hiển thị 0.00 G to, đậm, nằm gọn trong đáy Cốc nước để không đè viền */
     .cup-readout {
       position: absolute;
-      bottom: 2px;
-      left: 0px; /* Hoặc căn giữa nếu bạn dùng cách 1 trước đó */
-      font-size: 18px;     /* Tăng kích thước chữ từ 11px lên 16px (hoặc 18px tùy ý bạn) */
-      font-weight: 900;    /* In đậm tối đa (900 là cực kỳ đậm) */
-      color: var(--text);  /* Đổi sang màu chữ chính để hiển thị sắc nét hơn */
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 16px;
+      font-weight: 900;
+      color: var(--text);
       font-family: monospace;
+      background: rgba(255, 255, 255, 0.65);
+      padding: 1px 7px;
+      border-radius: 8px;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    :root:not([data-theme="light"]) .cup-readout {
+      background: rgba(15, 23, 42, 0.72);
     }
 
     /* KIỂU 1: 3 THANH NGANG (BAR CHART) */
@@ -375,12 +387,24 @@
 
     .bar-mark-lvl2 {
       position: absolute;
-      left: 80%;
+      left: 85%;
       top: 0;
       bottom: 0;
       width: 2px;
       background: var(--orange);
       z-index: 3;
+    }
+
+    /* Vạch giữ đỉnh (Peak Hold) trên thanh Bar */
+    .bar-peak-hold {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--red);
+      z-index: 4;
+      opacity: 0;
+      transition: left 0.05s linear, opacity 0.15s ease;
     }
 
     .bar-fill {
@@ -441,7 +465,7 @@
       stroke: var(--green);
       stroke-width: 9;
       stroke-linecap: round;
-      stroke-dasharray: 188.5; /* 2 * PI * 30 */
+      stroke-dasharray: 188.5;
       stroke-dashoffset: 188.5;
       transition: stroke-dashoffset 0.08s linear, stroke 0.12s ease;
     }
@@ -530,7 +554,7 @@
       border: 1px solid var(--border);
       border-radius: 18px;
       width: 100%;
-      max-width: 410px;
+      max-width: 420px;
       max-height: 90dvh;
       overflow-y: auto;
       padding: 15px;
@@ -554,7 +578,7 @@
       text-transform: uppercase;
       color: var(--blue);
       letter-spacing: 0.5px;
-      margin-top: 2px;
+      margin-top: 4px;
     }
 
     .setting-group {
@@ -609,6 +633,32 @@
     .btn-option:active {
       transform: scale(0.96);
     }
+
+    /* GÓC THÔNG TIN TÀI LIỆU THAM KHẢO TRONG SETTING */
+    .ref-info-box {
+      background: var(--btn-bg);
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 11.5px;
+      line-height: 1.45;
+      color: var(--subtext);
+      margin-top: 4px;
+    }
+
+    .ref-info-box strong {
+      color: var(--text);
+    }
+
+    .ref-info-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--blue);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
   </style>
 </head>
 <body>
@@ -650,8 +700,8 @@
           <div class="crosshair-h"></div>
           <div class="crosshair-v"></div>
           <div id="gBall" class="g-ball"></div>
+          <div id="cupReadout" class="cup-readout">0.00 G</div>
         </div>
-        <div id="cupReadout" class="cup-readout">0.00 G</div>
       </div>
 
       <!-- HIỂN THỊ KIỂU 1: BIỂU ĐỒ THANH NGANG (BAR CHART) -->
@@ -664,6 +714,7 @@
           <div class="bar-track">
             <div id="markGa1" class="bar-mark-lvl1"></div>
             <div id="markGa2" class="bar-mark-lvl2"></div>
+            <div id="peakGa" class="bar-peak-hold"></div>
             <div id="barGa" class="bar-fill"></div>
           </div>
         </div>
@@ -676,6 +727,7 @@
           <div class="bar-track">
             <div id="markPhanh1" class="bar-mark-lvl1"></div>
             <div id="markPhanh2" class="bar-mark-lvl2"></div>
+            <div id="peakPhanh" class="bar-peak-hold"></div>
             <div id="barPhanh" class="bar-fill"></div>
           </div>
         </div>
@@ -688,6 +740,7 @@
           <div class="bar-track">
             <div id="markCua1" class="bar-mark-lvl1"></div>
             <div id="markCua2" class="bar-mark-lvl2"></div>
+            <div id="peakCua" class="bar-peak-hold"></div>
             <div id="barCua" class="bar-fill"></div>
           </div>
         </div>
@@ -749,7 +802,7 @@
         <button id="btnCloseModal" class="btn-icon">Đóng ✕</button>
       </div>
 
-      <!-- TÙY CHỌN GIAO DIỆN & KIỂU BIỂU ĐỒ -->
+      <!-- 1. TÙY CHỌN GIAO DIỆN & KIỂU BIỂU ĐỒ -->
       <div class="section-divider">1. Hiển thị & Giao diện</div>
 
       <div class="setting-group">
@@ -774,9 +827,8 @@
         </div>
       </div>
 
-      <!-- CÀI ĐẶT 3 MỨC TIẾNG BÍP CẢNH BÁO (%) -->
-      <!-- CÀI ĐẶT MỨC BẮT ĐẦU BÍP TUYẾN TÍNH -->
-      <div class="section-divider">2. Cảnh báo Tiếng Bíp tuyến tính</div>
+      <!-- 2. CÀI ĐẶT TIẾNG BÍP & THỜI GIAN GIỮ THÔNG SỐ -->
+      <div class="section-divider">2. Âm thanh, Điểm số & Thời gian giữ</div>
 
       <div class="setting-group">
         <div class="setting-label">
@@ -787,14 +839,39 @@
       </div>
 
       <div class="setting-group">
+        <div class="setting-label">
+          <span>Tốc độ hồi phục Điểm Êm Ái (dt * X)</span>
+          <span id="lblScoreRecovery">3 đ/s</span>
+        </div>
+        <input type="range" id="rngScoreRecovery" min="1" max="20" step="1" value="3" />
+      </div>
+
+      <div class="setting-group">
+        <div class="setting-label">
+          <span>Giữ vạch/số đỉnh (Peak Hold)</span>
+          <span id="lblPeakHoldTime">1.5 giây</span>
+        </div>
+        <input type="range" id="rngPeakHoldTime" min="0.0" max="5.0" step="0.5" value="1.5" />
+      </div>
+
+      <div class="setting-group">
+        <div class="setting-label">
+          <span>Giữ thông báo cảnh báo (Ga/Phanh %)</span>
+          <span id="lblAlertHoldTime">3.0 giây</span>
+        </div>
+        <input type="range" id="rngAlertHoldTime" min="0.5" max="8.0" step="0.5" value="3.0" />
+      </div>
+
+      <div class="setting-group">
         <div class="setting-label"><span>Nghe thử âm thanh cảnh báo:</span></div>
-        <div class="option-grid-2">
-          <button class="btn-option" id="btnTestBeepLow">🔊 Nghe thử lúc chớm bíp</button>
-          <button class="btn-option" id="btnTestBeepHigh">🔊 Nghe thử lúc kịch đỉnh (100%)</button>
+        <div class="option-grid-3">
+          <button class="btn-option" id="btnTestBeepLow">🔊 Chớm bíp</button>
+          <button class="btn-option" id="btnTestBeepHigh">🔊 Kịch 100%</button>
+          <button class="btn-option" id="btnTestWeave">🚨 Lạng lách</button>
         </div>
       </div>
 
-      <!-- CÀI ĐẶT NGƯỠNG LỰC G TỐI ĐA (100%) -->
+      <!-- 3. CÀI ĐẶT NGƯỠNG LỰC G TỐI ĐA (100%) -->
       <div class="section-divider">3. Độ nhạy cảm biến (Mốc 100%)</div>
 
       <div class="setting-group">
@@ -828,6 +905,13 @@
         </div>
         <input type="range" id="rngMaxJerk" min="0.18" max="0.70" step="0.02" value="0.35" />
       </div>
+
+      <!-- 4. GÓC THÔNG TIN TÀI LIỆU THAM KHẢO -->
+      <div class="ref-info-box">
+        <div class="ref-info-title">📚 Nguồn tham khảo các thông số chuẩn:</div>
+        <div>• <strong>Ga (0.25G), Phanh (0.28G), Vào cua (0.25G):</strong> Theo tiêu chuẩn quốc tế <strong>ISO 2631-1</strong> (Độ êm ái & chống say xe cho hành khách) và chuẩn Telematics (<strong>Geotab / Samsara</strong>). Dưới 0.18G (~70%) là vùng êm ái tuyệt đối; vượt 0.25G–0.28G người ngồi sau phải gồng cơ cổ/lưng để giữ thăng bằng.</div>
+        <div style="margin-top: 4px;">• <strong>Lạng lách / Giật ngang (0.35 G/s):</strong> Theo tài liệu động lực học thiết kế đường đèo (<strong>AASHTO / IEEE Intelligent Vehicles</strong>). Độ giật ngang (Jerk) vượt 0.35 G/s (~3.4 m/s³) gây hiệu ứng quăng đầu đột ngột, dễ gây tiền đình trên đường núi.</div>
+      </div>
     </div>
   </div>
 
@@ -849,7 +933,10 @@
       maxPhanh: 0.28,
       maxCua: 0.25,
       maxJerk: 0.35,
-      startBeep: 70, // Mức phần trăm bắt đầu kêu bíp
+      startBeep: 70,        // Mức % bắt đầu kêu bíp tuyến tính
+      scoreRecovery: 3,     // Tốc độ hồi phục điểm êm ái (dt * scoreRecovery)
+      peakHoldTime: 1.5,    // Thời gian giữ vạch/số đỉnh Peak Hold (giây)
+      alertHoldTime: 3.0,   // Thời gian giữ hiển thị cảnh báo ngắn gọn (giây)
       testMode: true,
       theme: 'light',
       chartType: 'bar'
@@ -857,12 +944,12 @@
 
     let config = { ...defaultConfig };
     try {
-      const saved = JSON.parse(localStorage.getItem('smoodri_cfg_v2'));
+      const saved = JSON.parse(localStorage.getItem('smoodri_cfg_v3'));
       if (saved) config = { ...defaultConfig, ...saved };
     } catch (e) {}
 
     function saveConfig() {
-      localStorage.setItem('smoodri_cfg_v2', JSON.stringify(config));
+      localStorage.setItem('smoodri_cfg_v3', JSON.stringify(config));
     }
 
     /**************************************************************
@@ -910,7 +997,6 @@
       saveConfig();
     }
 
-    // Tính các mốc màu từ "Mức bắt đầu phát tiếng bíp" (startBeep)
     function syncBeepLevels() {
       const start = Number(config.startBeep) || 70;
       config.beepLvl1 = start;
@@ -920,17 +1006,14 @@
 
     function updateVisualThresholdMarkers() {
       syncBeepLevels();
-      // Đảm bảo Lvl1 < Lvl2 < Lvl3 hợp lý
       const r1 = Math.min(100, Math.round((config.beepLvl1 / config.beepLvl3) * 100));
       const r2 = Math.min(100, Math.round((config.beepLvl2 / config.beepLvl3) * 100));
 
-      // Cập nhật vòng tròn trong Cốc nước
       document.getElementById('cupRingLvl1').style.width = `${r1}%`;
       document.getElementById('cupRingLvl1').style.height = `${r1}%`;
       document.getElementById('cupRingLvl2').style.width = `${r2}%`;
       document.getElementById('cupRingLvl2').style.height = `${r2}%`;
 
-      // Cập nhật vạch trên 3 thanh ngang
       ['Ga', 'Phanh', 'Cua'].forEach((k) => {
         document.getElementById(`mark${k}1`).style.left = `${Math.min(98, config.beepLvl1)}%`;
         document.getElementById(`mark${k}2`).style.left = `${Math.min(98, config.beepLvl2)}%`;
@@ -938,10 +1021,11 @@
     }
 
     /**************************************************************
-     * 4. BỘ PHÁT TIẾNG BÍP TUYẾN TÍNH (ĐỘ TRỄ 0MS)
+     * 4. BỘ PHÁT TIẾNG BÍP TUYẾN TÍNH & ÂM SẮC RIÊNG CHO LẠNG LÁCH
      **************************************************************/
     let audioCtx = null;
     let lastBeepTime = 0;
+    let weaveToneToggle = false;
 
     function initAudioContext() {
       if (!audioCtx) {
@@ -953,7 +1037,7 @@
       }
     }
 
-    function emitSingleBeep(freq, durationMs, waveType = 'sine', volume = 0.25) {
+    function emitSingleBeep(freq, durationMs, waveType = 'sine', volume = 0.26) {
       initAudioContext();
       if (!audioCtx) return;
 
@@ -975,7 +1059,7 @@
       osc.stop(now + durationMs / 1000 + 0.02);
     }
 
-    // Thuật toán tuyến tính: Lực G càng lớn thì nhịp bíp càng ngắn, tần số càng cao
+    // Tiếng bíp tuyến tính cho Ga / Phanh / Vào cua
     function handleLinearBeep(maxPct) {
       const startLimit = config.startBeep || 70;
       if (maxPct < startLimit) {
@@ -984,14 +1068,10 @@
       }
 
       const now = performance.now();
+      const ratio = Math.min(1, (maxPct - startLimit) / Math.max(1, 100 - startLimit));
 
-      // Chuẩn hóa tỷ lệ từ startLimit (ví dụ 70%) đến 100% (hoặc hơn)
-      const ratio = Math.min(1, (maxPct - startLimit) / (100 - startLimit));
-
-      // Tuyến tính hóa khoảng thời gian giữa 2 tiếng bíp: từ 650ms (chớm bíp) rút ngắn mượt xuống 120ms (kịch 100%)
-      const intervalMs = Math.round(650 - ratio * (650 - 120));
-
-      // Tần số âm thanh cao dần từ 600Hz lên 1020Hz để tạo cảm giác cấp bách
+      // Khoảng nghỉ giữa 2 tiếng bíp thu hẹp tuyến tính từ 650ms xuống 115ms
+      const intervalMs = Math.round(650 - ratio * (650 - 115));
       const freq = Math.round(600 + ratio * 420);
       const wave = ratio > 0.7 ? 'triangle' : 'sine';
 
@@ -1001,8 +1081,20 @@
       }
     }
 
+    // Âm sắc riêng biệt cho lỗi Lạng lách / Giật lái (Âm kép Cao-Thấp luân phiên)
+    function handleWeavingBeep() {
+      const now = performance.now();
+      const intervalMs = 135;
+      if (now - lastBeepTime >= intervalMs) {
+        lastBeepTime = now;
+        weaveToneToggle = !weaveToneToggle;
+        const freq = weaveToneToggle ? 1180 : 720;
+        emitSingleBeep(freq, 90, 'sawtooth', 0.30);
+      }
+    }
+
     /**************************************************************
-     * 5. THUẬT TOÁN CẢM BIẾN 3D, BÙ DỐC ĐƯỜNG ĐÈO & LẠNG LÁCH
+     * 5. THUẬT TOÁN CẢM BIẾN 3D, CHỈ BÙ DỐC DỌC & PEAK HOLD
      **************************************************************/
     let isRunning = false;
     let needsCalibration = false;
@@ -1016,17 +1108,35 @@
     let lastAltitude = null;
     let altitudeDelta = 0;
 
-    // Vector trọng lực gốc khi bấm Cân chỉnh (Hỗ trợ mọi góc gắn máy: nằm phẳng, 45° hay dựng đứng 90°)
     let manualOffset = { x: 0, y: 0, z: 1 };
     let rawSensor = { x: 0, y: 0, z: 1 };
 
-    let slopeBaseline = { x: 0, lon: 0 };
+    // Chỉ bù dốc tự động theo trục dọc (lon) khi lên/xuống đèo, KHÔNG bù trục ngang (x) để tránh văng ngược chấm xanh sau khi thoát cua dài
+    let slopeBaselineLon = 0;
     let smoothG = { x: 0, lon: 0 };
     let prevLateralG = 0;
     let prevTimestamp = performance.now();
 
     let reversalTimestamps = [];
     let lastSignX = 0;
+
+    // Bộ nhớ giữ đỉnh (Peak Hold) cho 3 thông số
+    const peakHoldData = {
+      Ga: { val: 0, time: 0 },
+      Phanh: { val: 0, time: 0 },
+      Cua: { val: 0, time: 0 }
+    };
+
+    // Bộ nhớ giữ thông báo cảnh báo ngắn gọn trên hộp Banner
+    const alertHoldData = {
+      active: false,
+      lastTriggerTime: 0,
+      maxLevel: 0,
+      peakGa: 0,
+      peakPhanh: 0,
+      peakCua: 0,
+      weaving: false
+    };
 
     function calibrateZeroG() {
       if (hasSensorData) {
@@ -1035,14 +1145,17 @@
         manualOffset.z = rawSensor.z;
         needsCalibration = false;
       } else {
-        // Nếu cảm biến chưa kịp gửi gói tin đầu tiên, đặt cờ để tự cân chỉnh ở gói tin đầu tiên
         needsCalibration = true;
       }
-      slopeBaseline.x = 0;
-      slopeBaseline.lon = 0;
+      slopeBaselineLon = 0;
       smoothG.x = 0;
       smoothG.lon = 0;
       reversalTimestamps = [];
+      ['Ga', 'Phanh', 'Cua'].forEach((k) => {
+        peakHoldData[k].val = 0;
+        peakHoldData[k].time = 0;
+      });
+      alertHoldData.active = false;
     }
 
     function startBackgroundGPS() {
@@ -1116,22 +1229,20 @@
       const normYZ = Math.hypot(manualOffset.y, manualOffset.z);
       let lonCal = dy;
       if (normYZ > 0.25) {
-        // Phép chiếu vuông góc với vector trọng lực ban đầu trong mặt phẳng Y-Z
         lonCal = (dy * manualOffset.z - dz * manualOffset.y) / normYZ;
       }
 
-      // 2. TỰ ĐỘNG PHÁT HIỆN ĐỘ DỐC ĐƯỜNG ĐÈO & BÙ DỐC (~4 giây)
+      // 2. TỰ ĐỘNG PHÁT HIỆN ĐỘ DỐC ĐƯỜNG ĐÈO & CHỈ BÙ DỐC TRỤC DỌC (Không bù trục ngang X)
       const slopeAlpha = Math.min(dt / 4.0, 0.05);
-      slopeBaseline.x += (xCal - slopeBaseline.x) * slopeAlpha;
-      slopeBaseline.lon += (lonCal - slopeBaseline.lon) * slopeAlpha;
+      slopeBaselineLon += (lonCal - slopeBaselineLon) * slopeAlpha;
 
-      const slopeDeg = Math.round(Math.abs(Math.asin(Math.max(-1, Math.min(1, slopeBaseline.lon))) * (180 / Math.PI)));
+      const slopeDeg = Math.round(Math.abs(Math.asin(Math.max(-1, Math.min(1, slopeBaselineLon))) * (180 / Math.PI)));
       const isMountainPass = slopeDeg >= 3 || altitudeDelta > 1.5;
       updateSlopeBadge(slopeDeg, isMountainPass);
 
       // 3. TÍNH LỰC G ĐỘNG TÁC ĐỘNG LÊN NGƯỜI NGỒI SAU
-      let dynamicX = xCal - slopeBaseline.x;
-      let dynamicLon = lonCal - slopeBaseline.lon;
+      let dynamicX = xCal;
+      let dynamicLon = lonCal - slopeBaselineLon;
 
       if (lin && lin.x !== null && lin.y !== null) {
         const linX = lin.x / 9.80665;
@@ -1163,7 +1274,7 @@
         reversalTimestamps.length >= 2 ||
         (lateralJerk > config.maxJerk && Math.abs(smoothG.x) > config.maxCua * 0.65);
 
-      evaluateAndRender(smoothG.x, smoothG.lon, isWeaving, dt);
+      evaluateAndRender(smoothG.x, smoothG.lon, isWeaving, dt, now);
     }
 
     function updateSlopeBadge(deg, isMountain) {
@@ -1185,44 +1296,69 @@
       return 'var(--green)';
     }
 
-    function updateMetricDisplay(key, pct) {
-      const color = getLevelColor(pct);
-      const clamped = Math.min(100, pct);
+    function updateMetricDisplay(key, livePct, now) {
+      const holdMs = (Number(config.peakHoldTime) || 0) * 1000;
+      const pk = peakHoldData[key];
 
-      // Cập nhật Thanh ngang (Bar)
+      // Cập nhật Peak Hold
+      if (livePct >= pk.val) {
+        pk.val = livePct;
+        if (livePct > 0) pk.time = now;
+      } else if (holdMs <= 0 || now - pk.time > holdMs) {
+        pk.val = livePct;
+      }
+
+      const displayPct = pk.val;
+      const liveClamped = Math.min(100, livePct);
+      const peakClamped = Math.min(100, displayPct);
+      const liveColor = getLevelColor(livePct);
+      const peakColor = getLevelColor(displayPct);
+
+      // 1. Cập nhật Thanh ngang (Bar): Thanh màu chạy theo lực thực tế, con số % & vạch đỉnh giữ theo Peak Hold
       const bar = document.getElementById(`bar${key}`);
       const val = document.getElementById(`val${key}`);
-      bar.style.width = `${clamped}%`;
-      bar.style.backgroundColor = color;
-      val.textContent = `${pct}%`;
+      const peakLine = document.getElementById(`peak${key}`);
 
-      // Cập nhật Vòng tròn (Donut) - Chu vi r=30 là 188.5
+      bar.style.width = `${liveClamped}%`;
+      bar.style.backgroundColor = liveColor;
+      val.textContent = `${displayPct}%`;
+      val.style.color = displayPct >= config.beepLvl1 ? peakColor : 'var(--text)';
+
+      if (holdMs > 0 && displayPct >= 15) {
+        peakLine.style.opacity = '1';
+        peakLine.style.left = `calc(${peakClamped}% - 2px)`;
+        peakLine.style.backgroundColor = peakColor;
+      } else {
+        peakLine.style.opacity = '0';
+      }
+
+      // 2. Cập nhật Vòng tròn (Donut): Giữ vòng & số theo Peak Hold để liếc nhìn dễ dàng
       const ring = document.getElementById(`donut${key}`);
       const dVal = document.getElementById(`donutVal${key}`);
       const circumference = 188.5;
-      const offset = circumference - (clamped / 100) * circumference;
+      const offset = circumference - (peakClamped / 100) * circumference;
       ring.style.strokeDashoffset = offset;
-      ring.style.stroke = color;
-      dVal.textContent = `${pct}%`;
-      dVal.style.color = pct >= config.beepLvl1 ? color : 'var(--text)';
+      ring.style.stroke = peakColor;
+      dVal.textContent = `${displayPct}%`;
+      dVal.style.color = displayPct >= config.beepLvl1 ? peakColor : 'var(--text)';
     }
 
-    function evaluateAndRender(gx, glon, isWeaving, dt) {
+    function evaluateAndRender(gx, glon, isWeaving, dt, now) {
       const accelG = Math.max(0, glon);
       const brakeG = Math.max(0, -glon);
       const cornerG = Math.abs(gx);
       const totalG = Math.hypot(gx, glon);
 
-      const pctGa = Math.min(130, Math.round((accelG / config.maxGa) * 100));
-      const pctPhanh = Math.min(130, Math.round((brakeG / config.maxPhanh) * 100));
-      const pctCua = Math.min(130, Math.round((cornerG / config.maxCua) * 100));
+      const pctGa = Math.min(150, Math.round((accelG / config.maxGa) * 100));
+      const pctPhanh = Math.min(150, Math.round((brakeG / config.maxPhanh) * 100));
+      const pctCua = Math.min(150, Math.round((cornerG / config.maxCua) * 100));
       const maxPct = Math.max(pctGa, pctPhanh, pctCua);
 
-      updateMetricDisplay('Ga', pctGa);
-      updateMetricDisplay('Phanh', pctPhanh);
-      updateMetricDisplay('Cua', pctCua);
+      updateMetricDisplay('Ga', pctGa, now);
+      updateMetricDisplay('Phanh', pctPhanh, now);
+      updateMetricDisplay('Cua', pctCua, now);
 
-      // Cập nhật vị trí chấm tròn theo bán kính thực tế của Cốc nước trên màn hình
+      // Cập nhật vị trí chấm tròn trong Cốc nước
       const cupEl = document.getElementById('cupCircle');
       const maxRadiusPx = Math.max(45, cupEl.clientWidth / 2 - 14);
       const maxRef = Math.max(config.maxGa, config.maxPhanh, config.maxCua);
@@ -1240,40 +1376,86 @@
       const banner = document.getElementById('alertBanner');
       const title = document.getElementById('alertTitle');
       const sub = document.getElementById('alertSub');
-      banner.className = 'alert-banner';
 
       if (isParked) {
+        banner.className = 'alert-banner';
         title.textContent = 'XE ĐANG ĐỖ';
         sub.textContent = 'Tạm khóa tiếng bíp dưới 5 km/h';
         handleLinearBeep(0);
         return;
       }
 
-      // Gọi tiếng bíp tuyến tính theo % lực G lớn nhất
+      const startLimit = Number(config.startBeep) || 70;
+      const isTriggered = isWeaving || maxPct >= startLimit;
+
+      // 1. XỬ LÝ ÂM THANH & ĐIỂM ÊM ÁI THEO THỜI GIAN THỰC
       if (isWeaving) {
-        banner.classList.add('warn-100');
-        title.textContent = '⚠️ LẠNG LÁCH / GIẬT LÁI!';
-        sub.textContent = 'Giữ đều vô lăng khi ôm cua';
         smoothnessScore = Math.max(0, smoothnessScore - dt * 12);
-        handleLinearBeep(110); // Ép nhịp bíp dồn dập tối đa
+        handleWeavingBeep();
       } else if (maxPct >= 100) {
-        banner.classList.add('warn-100');
         smoothnessScore = Math.max(0, smoothnessScore - dt * 9);
         handleLinearBeep(maxPct);
-        title.textContent = `🛑 VƯỢT NGƯỠNG (${maxPct}%)`;
-        sub.textContent = 'Thao tác quá gắt, cần giảm cường độ!';
-      } else if (maxPct >= config.startBeep) {
-        banner.classList.add('warn-80');
+      } else if (maxPct >= startLimit) {
         smoothnessScore = Math.max(0, smoothnessScore - dt * 3);
         handleLinearBeep(maxPct);
-        title.textContent = `⚠️ ĐANG TIẾN SÁT GIỚI HẠN (${maxPct}%)`;
-        sub.textContent = 'Nới nhẹ chân ga/phanh để giữ êm ái';
       } else {
-        handleLinearBeep(0); // Dừng bíp
+        handleLinearBeep(0);
+        const recRate = Number(config.scoreRecovery) || 3;
+        smoothnessScore = Math.min(100, smoothnessScore + dt * recRate);
+      }
+
+      // 2. XỬ LÝ HỘP CẢNH BÁO NGẮN GỌN & GIỮ HIỂN THỊ (alertHoldTime)
+      const alertHoldMs = (Number(config.alertHoldTime) || 3.0) * 1000;
+
+      if (isTriggered) {
+        if (!alertHoldData.active || now - alertHoldData.lastTriggerTime > alertHoldMs) {
+          alertHoldData.peakGa = 0;
+          alertHoldData.peakPhanh = 0;
+          alertHoldData.peakCua = 0;
+          alertHoldData.maxLevel = 0;
+          alertHoldData.weaving = false;
+        }
+
+        alertHoldData.active = true;
+        alertHoldData.lastTriggerTime = now;
+
+        if (isWeaving) {
+          alertHoldData.weaving = true;
+          alertHoldData.maxLevel = Math.max(alertHoldData.maxLevel, 100);
+        }
+        if (pctGa >= startLimit) {
+          alertHoldData.peakGa = Math.max(alertHoldData.peakGa, pctGa);
+        }
+        if (pctPhanh >= startLimit) {
+          alertHoldData.peakPhanh = Math.max(alertHoldData.peakPhanh, pctPhanh);
+        }
+        if (pctCua >= startLimit) {
+          alertHoldData.peakCua = Math.max(alertHoldData.peakCua, pctCua);
+        }
+        alertHoldData.maxLevel = Math.max(alertHoldData.maxLevel, maxPct);
+      }
+
+      if (alertHoldData.active && now - alertHoldData.lastTriggerTime <= alertHoldMs) {
+        const parts = [];
+        if (alertHoldData.weaving) parts.push('Lạng lách!');
+        if (alertHoldData.peakGa >= startLimit) parts.push(`Ga: ${alertHoldData.peakGa}%`);
+        if (alertHoldData.peakPhanh >= startLimit) parts.push(`Phanh: ${alertHoldData.peakPhanh}%`);
+        if (alertHoldData.peakCua >= startLimit) parts.push(`Cua: ${alertHoldData.peakCua}%`);
+
+        banner.className = 'alert-banner';
+        if (alertHoldData.maxLevel >= 100 || alertHoldData.weaving) {
+          banner.classList.add('warn-100');
+          sub.textContent = isTriggered ? 'Vượt ngưỡng! Giảm cường độ ngay' : 'Đang giữ thông số đỉnh vừa vượt';
+        } else {
+          banner.classList.add('warn-80');
+          sub.textContent = isTriggered ? 'Nới nhẹ thao tác để giữ êm ái' : 'Đang giữ thông số cảnh báo';
+        }
+        title.textContent = parts.join('  •  ') || `Cảnh báo: ${alertHoldData.maxLevel}%`;
+      } else {
+        alertHoldData.active = false;
         banner.className = 'alert-banner';
         title.textContent = 'LÁI XE ÊM ÁI';
-        sub.textContent = 'Người ngồi thoải mái';
-        smoothnessScore = Math.min(100, smoothnessScore + dt * 10); // công thức hồi phục điểm êm ái
+        sub.textContent = 'Người ngồi sau rất thoải mái';
       }
 
       const scoreEl = document.getElementById('scoreValue');
@@ -1378,27 +1560,33 @@
     document.getElementById('btnChartBar').addEventListener('click', () => applyChartType('bar'));
     document.getElementById('btnChartDonut').addEventListener('click', () => applyChartType('donut'));
 
-    
-    // Nút nghe thử âm thanh tuyến tính
+    // Nút nghe thử âm thanh tuyến tính & âm thanh Lạng lách
     document.getElementById('btnTestBeepLow').addEventListener('click', () => {
       initAudioContext();
-      emitSingleBeep(600, 80, 'sine', 0.25); // Tiếng bíp thưa, trầm
+      emitSingleBeep(600, 80, 'sine', 0.25);
     });
 
     document.getElementById('btnTestBeepHigh').addEventListener('click', () => {
       initAudioContext();
-      // Giả lập chuỗi bíp dồn dập khi gần 100%
       for (let i = 0; i < 4; i++) {
-        setTimeout(() => emitSingleBeep(1020, 75, 'triangle', 0.3), i * 140);
+        setTimeout(() => emitSingleBeep(1020, 75, 'triangle', 0.3), i * 130);
       }
     });
 
-    // Ràng buộc thanh trượt Mức bắt đầu bíp
-    bindSlider('rngStartBeep', 'lblStartBeep', 'startBeep', '%', 0);
+    document.getElementById('btnTestWeave').addEventListener('click', () => {
+      initAudioContext();
+      for (let i = 0; i < 4; i++) {
+        const freq = i % 2 === 0 ? 1180 : 720;
+        setTimeout(() => emitSingleBeep(freq, 85, 'sawtooth', 0.3), i * 135);
+      }
+    });
 
+    // Khai báo hàm bindSlider trước khi gọi
     function bindSlider(sliderId, labelId, cfgKey, unit, decimals = 2) {
       const slider = document.getElementById(sliderId);
       const label = document.getElementById(labelId);
+      if (!slider || !label) return;
+
       slider.value = config[cfgKey];
       label.textContent = `${Number(config[cfgKey]).toFixed(decimals)} ${unit}`;
 
@@ -1411,6 +1599,10 @@
       });
     }
 
+    bindSlider('rngStartBeep', 'lblStartBeep', 'startBeep', '%', 0);
+    bindSlider('rngScoreRecovery', 'lblScoreRecovery', 'scoreRecovery', 'đ/s', 0);
+    bindSlider('rngPeakHoldTime', 'lblPeakHoldTime', 'peakHoldTime', 'giây', 1);
+    bindSlider('rngAlertHoldTime', 'lblAlertHoldTime', 'alertHoldTime', 'giây', 1);
     bindSlider('rngMaxGa', 'lblMaxGa', 'maxGa', 'G', 2);
     bindSlider('rngMaxPhanh', 'lblMaxPhanh', 'maxPhanh', 'G', 2);
     bindSlider('rngMaxCua', 'lblMaxCua', 'maxCua', 'G', 2);

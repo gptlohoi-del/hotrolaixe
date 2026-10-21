@@ -1,16 +1,17 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#0b1120" />
+  <meta name="theme-color" content="#f1f5f9" id="metaThemeColor" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>Trợ lý Lái xe Êm ái</title>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>SmooDri - Trợ lý Lái xe Êm ái</title>
   <link rel="manifest" href="./manifest.json" />
-  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/18307/18307152.png" />
+  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/1126/1126585.png" />
 
   <style>
+    /* GIAO DIỆN TỐI (DARK MODE) */
     :root {
       --bg: #0b1120;
       --card: #162033;
@@ -19,25 +20,45 @@
       --subtext: #94a3b8;
       --green: #10b981;
       --yellow: #f59e0b;
+      --orange: #f97316;
       --red: #ef4444;
       --blue: #38bdf8;
       --bar-bg: #090d16;
       --bar-border: #1e293b;
+      --btn-bg: #0f172a;
+      --cup-bg: radial-gradient(circle, rgba(16, 185, 129, 0.14) 0%, rgba(15, 23, 42, 0.95) 75%);
+      --crosshair: rgba(148, 163, 184, 0.22);
+      --warn70-bg: rgba(245, 158, 11, 0.14);
+      --warn70-text: #fde68a;
+      --warn80-bg: rgba(249, 115, 22, 0.22);
+      --warn80-text: #ffedd5;
+      --warn100-bg: rgba(239, 68, 68, 0.28);
+      --warn100-text: #fecaca;
     }
 
-    /* Giao diện Sáng (Light Mode) */
+    /* GIAO DIỆN SÁNG (LIGHT MODE - MẶC ĐỊNH) */
     [data-theme="light"] {
       --bg: #f1f5f9;
       --card: #ffffff;
       --border: #cbd5e1;
       --text: #0f172a;
-      --subtext: #64748b;
+      --subtext: #475569;
       --green: #059669;
       --yellow: #d97706;
+      --orange: #ea580c;
       --red: #dc2626;
       --blue: #0284c7;
       --bar-bg: #e2e8f0;
       --bar-border: #cbd5e1;
+      --btn-bg: #f8fafc;
+      --cup-bg: radial-gradient(circle, rgba(16, 185, 129, 0.18) 0%, rgba(241, 245, 249, 0.95) 75%);
+      --crosshair: rgba(71, 85, 105, 0.22);
+      --warn70-bg: #fef3c7;
+      --warn70-text: #92400e;
+      --warn80-bg: #ffedd5;
+      --warn80-text: #9a3412;
+      --warn100-bg: #fee2e2;
+      --warn100-text: #991b1b;
     }
 
     * {
@@ -56,6 +77,7 @@
       background-color: var(--bg);
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      transition: background-color 0.2s ease, color 0.2s ease;
     }
 
     .app-container {
@@ -73,7 +95,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 44px;
+      height: 42px;
       flex-shrink: 0;
     }
 
@@ -86,30 +108,30 @@
       padding: 6px 10px;
       border-radius: 10px;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--subtext);
-      transition: all 0.3s ease;
+      transition: all 0.25s ease;
     }
 
     .slope-badge.mountain-active {
-      background: rgba(56, 189, 248, 0.15);
+      background: rgba(2, 132, 199, 0.14);
       border-color: var(--blue);
       color: var(--blue);
     }
 
     .top-actions {
       display: flex;
-      gap: 8px;
+      gap: 6px;
     }
 
     .btn-icon {
       background: var(--card);
       border: 1px solid var(--border);
       color: var(--text);
-      padding: 8px 12px;
+      padding: 7px 11px;
       border-radius: 10px;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -117,15 +139,15 @@
     }
 
     .btn-icon:active {
-      transform: scale(0.96);
+      transform: scale(0.95);
     }
 
     /* HÀNG 2: ĐIỂM ÊM ÁI & HỘP CẢNH BÁO TRỰC QUAN */
     .status-row {
       display: grid;
-      grid-template-columns: 110px 1fr;
+      grid-template-columns: 106px 1fr;
       gap: 8px;
-      height: 76px;
+      height: 74px;
       flex-shrink: 0;
     }
 
@@ -141,10 +163,10 @@
     }
 
     .score-label {
-      font-size: 11px;
+      font-size: 10px;
       text-transform: uppercase;
       color: var(--subtext);
-      font-weight: 700;
+      font-weight: 800;
       letter-spacing: 0.5px;
     }
 
@@ -163,42 +185,56 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 8px;
+      padding: 6px 8px;
       text-align: center;
-      transition: all 0.15s ease;
+      transition: all 0.12s ease;
+    }
+
+    .alert-banner.warn-70 {
+      background: var(--warn70-bg);
+      border-color: var(--yellow);
+      color: var(--warn70-text);
     }
 
     .alert-banner.warn-80 {
-      background: rgba(245, 158, 11, 0.18);
-      border-color: var(--yellow);
-      color: #fde68a;
+      background: var(--warn80-bg);
+      border-color: var(--orange);
+      color: var(--warn80-text);
     }
 
     .alert-banner.warn-100 {
-      background: rgba(239, 68, 68, 0.28);
+      background: var(--warn100-bg);
       border-color: var(--red);
-      color: #fecaca;
-      animation: pulseRed 0.4s infinite alternate;
+      color: var(--warn100-text);
+      animation: pulseRed 0.35s infinite alternate;
     }
 
     @keyframes pulseRed {
       from { transform: scale(1); }
-      to { transform: scale(1.02); }
+      to { transform: scale(1.018); }
     }
 
     .alert-title {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 800;
-      letter-spacing: 0.3px;
+      letter-spacing: 0.2px;
     }
 
     .alert-sub {
       font-size: 12px;
       color: var(--subtext);
       margin-top: 2px;
+      font-weight: 600;
     }
 
-    /* HÀNG 3: TÂM NGẮM CỐC NƯỚC & 3 THANH LỰC G */
+    .alert-banner.warn-70 .alert-sub,
+    .alert-banner.warn-80 .alert-sub,
+    .alert-banner.warn-100 .alert-sub {
+      color: inherit;
+      opacity: 0.9;
+    }
+
+    /* HÀNG 3: TÂM NGẮM CỐC NƯỚC & BIỂU ĐỒ (BAR / DONUT) */
     .main-panel {
       flex: 1;
       background: var(--card);
@@ -207,7 +243,7 @@
       padding: 10px 12px;
       display: flex;
       flex-direction: column;
-      justify-content: space-evenly;
+      justify-content: space-between;
       min-height: 0;
     }
 
@@ -218,46 +254,52 @@
       justify-content: center;
       position: relative;
       flex: 1;
-      min-height: 120px;
-      max-height: 190px;
+      min-height: 115px;
+      max-height: 210px;
+      padding: 4px 0;
     }
 
     .cup-circle {
       height: 100%;
       aspect-ratio: 1 / 1;
-      max-width: 180px;
-      max-height: 180px;
+      max-width: 195px;
+      max-height: 195px;
       border-radius: 50%;
-      border: 2px solid var(--red);
-      background: radial-gradient(circle, rgba(16,185,129,0.12) 0%, rgba(15,23,42,0.9) 75%);
+      border: 2.5px solid var(--red);
+      background: var(--cup-bg);
       position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
+      box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.06);
     }
 
-    .cup-ring-80 {
+    /* Vòng Ngưỡng 2 (Mặc định 80%) */
+    .cup-ring-lvl2 {
       width: 80%;
       height: 80%;
       border-radius: 50%;
-      border: 1.5px dashed var(--yellow);
+      border: 1.5px dashed var(--orange);
       position: absolute;
       pointer-events: none;
+      transition: width 0.2s, height 0.2s;
     }
 
-    .cup-ring-40 {
-      width: 40%;
-      height: 40%;
+    /* Vòng Ngưỡng 1 (Mặc định 70%) */
+    .cup-ring-lvl1 {
+      width: 70%;
+      height: 70%;
       border-radius: 50%;
-      border: 1px solid rgba(16, 185, 129, 0.4);
+      border: 1.2px dotted var(--yellow);
       position: absolute;
       pointer-events: none;
+      transition: width 0.2s, height 0.2s;
     }
 
     .crosshair-h, .crosshair-v {
       position: absolute;
-      background: rgba(148, 163, 184, 0.2);
+      background: var(--crosshair);
       pointer-events: none;
     }
     .crosshair-h { width: 100%; height: 1px; }
@@ -275,27 +317,32 @@
       z-index: 2;
     }
 
-    .cup-Readout {
+    .cup-readout {
       position: absolute;
-      bottom: 4px;
-      right: 6px;
+      bottom: 2px;
+      right: 4px;
       font-size: 11px;
+      font-weight: 700;
       color: var(--subtext);
       font-family: monospace;
     }
 
-    /* 3 Thanh đo lực */
+    /* KIỂU 1: 3 THANH NGANG (BAR CHART) */
     .bars-container {
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      margin-top: 6px;
+      gap: 9px;
+      margin-top: 4px;
+    }
+
+    .bars-container.hidden {
+      display: none;
     }
 
     .bar-item {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 3px;
     }
 
     .bar-header {
@@ -307,7 +354,7 @@
 
     .bar-track {
       width: 100%;
-      height: 16px;
+      height: 15px;
       background: var(--bar-bg);
       border-radius: 8px;
       position: relative;
@@ -315,13 +362,24 @@
       border: 1px solid var(--bar-border);
     }
 
-    .bar-mark-80 {
+    .bar-mark-lvl1 {
+      position: absolute;
+      left: 70%;
+      top: 0;
+      bottom: 0;
+      width: 1.5px;
+      background: var(--yellow);
+      z-index: 3;
+      opacity: 0.85;
+    }
+
+    .bar-mark-lvl2 {
       position: absolute;
       left: 80%;
       top: 0;
       bottom: 0;
       width: 2px;
-      background: var(--yellow);
+      background: var(--orange);
       z-index: 3;
     }
 
@@ -330,14 +388,83 @@
       width: 0%;
       background: var(--green);
       border-radius: 7px;
-      transition: width 0.08s linear, background-color 0.15s ease;
+      transition: width 0.08s linear, background-color 0.12s ease;
+    }
+
+    /* KIỂU 2: 3 VÒNG TRÒN (DONUT CHART) */
+    .donuts-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      padding: 6px 0 2px 0;
+      align-items: center;
+    }
+
+    .donuts-container.hidden {
+      display: none;
+    }
+
+    .donut-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: var(--btn-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 8px 4px;
+    }
+
+    .donut-svg-wrap {
+      position: relative;
+      width: 74px;
+      height: 74px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .donut-svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .donut-track {
+      fill: none;
+      stroke: var(--bar-bg);
+      stroke-width: 9;
+    }
+
+    .donut-ring {
+      fill: none;
+      stroke: var(--green);
+      stroke-width: 9;
+      stroke-linecap: round;
+      stroke-dasharray: 188.5; /* 2 * PI * 30 */
+      stroke-dashoffset: 188.5;
+      transition: stroke-dashoffset 0.08s linear, stroke 0.12s ease;
+    }
+
+    .donut-val {
+      position: absolute;
+      font-size: 16px;
+      font-weight: 900;
+      color: var(--text);
+    }
+
+    .donut-label {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--subtext);
+      text-align: center;
     }
 
     /* HÀNG 4: NÚT BẮT ĐẦU & CHẾ ĐỘ THỬ */
     .bottom-bar {
       display: flex;
       gap: 8px;
-      height: 56px;
+      height: 54px;
       flex-shrink: 0;
     }
 
@@ -345,7 +472,7 @@
       flex: 1;
       border: none;
       border-radius: 14px;
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 800;
       color: #fff;
       background: linear-gradient(135deg, #10b981, #059669);
@@ -354,16 +481,16 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.28);
     }
 
     .btn-main.running {
       background: linear-gradient(135deg, #ef4444, #dc2626);
-      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.28);
     }
 
     .btn-test-mode {
-      width: 105px;
+      width: 104px;
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 14px;
@@ -386,11 +513,11 @@
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.78);
+      background: rgba(0, 0, 0, 0.65);
       display: none;
       align-items: center;
       justify-content: center;
-      padding: 16px;
+      padding: 14px;
       z-index: 50;
     }
 
@@ -403,13 +530,14 @@
       border: 1px solid var(--border);
       border-radius: 18px;
       width: 100%;
-      max-width: 400px;
+      max-width: 410px;
       max-height: 90dvh;
       overflow-y: auto;
-      padding: 16px;
+      padding: 15px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 12px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
     }
 
     .modal-header {
@@ -417,73 +545,84 @@
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid var(--border);
-      padding-bottom: 10px;
+      padding-bottom: 8px;
+    }
+
+    .section-divider {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--blue);
+      letter-spacing: 0.5px;
+      margin-top: 2px;
     }
 
     .setting-group {
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 4px;
     }
 
     .setting-label {
       display: flex;
       justify-content: space-between;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     input[type="range"] {
       width: 100%;
       accent-color: var(--blue);
-      height: 24px;
+      height: 22px;
     }
 
-    .sound-test-grid {
+    .option-grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 8px;
     }
 
-    .btn-sound {
-      background: #0f172a;
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 10px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
+    .option-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
     }
 
-    .btn-update-cache {
-      background: rgba(56, 189, 248, 0.15);
-      border: 1px solid var(--blue);
-      color: var(--blue);
-      padding: 11px;
+    .btn-option {
+      background: var(--btn-bg);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      padding: 9px 6px;
       border-radius: 10px;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
       cursor: pointer;
       text-align: center;
     }
 
-    .audio-status {
-      font-size: 12px;
-      color: var(--subtext);
-      text-align: center;
+    .btn-option.selected {
+      border-color: var(--blue);
+      background: rgba(2, 132, 199, 0.14);
+      color: var(--blue);
+    }
+
+    .btn-option:active {
+      transform: scale(0.96);
     }
   </style>
 </head>
 <body>
   <div class="app-container">
-    <!-- HÀNG 1: TRẠNG THÁI ĐỘ DỐC & NÚT CÀI ĐẶT -->
+    <!-- HÀNG 1: TRẠNG THÁI ĐỘ DỐC & NÚT CÔNG CỤ -->
     <div class="top-bar">
       <div id="slopeBadge" class="slope-badge">
         <span>⛰️</span>
         <span id="slopeText">Đường bằng (0°)</span>
       </div>
       <div class="top-actions">
+        <button id="btnQuickCalib" class="btn-icon" title="Đặt lại tâm 0G ngay lập tức">
+          🎯 Đặt lại 0G
+        </button>
         <button id="btnSettings" class="btn-icon" title="Mở cài đặt">
           ⚙️
         </button>
@@ -498,58 +637,95 @@
       </div>
       <div id="alertBanner" class="alert-banner">
         <div id="alertTitle" class="alert-title">SẴN SÀNG</div>
-        <div id="alertSub" class="alert-sub">Bấm Cân chỉnh & Bắt đầu</div>
+        <div id="alertSub" class="alert-sub">Gắn cố định máy & bấm Bắt đầu</div>
       </div>
     </div>
 
-    <!-- HÀNG 3: CỐC NƯỚC LỰC G & 3 THANH ĐO -->
+    <!-- HÀNG 3: CỐC NƯỚC LỰC G & BIỂU ĐỒ (BAR / DONUT) -->
     <div class="main-panel">
       <div class="cup-wrapper">
         <div class="cup-circle" id="cupCircle">
-          <div class="cup-ring-80"></div>
-          <div class="cup-ring-40"></div>
+          <div id="cupRingLvl2" class="cup-ring-lvl2"></div>
+          <div id="cupRingLvl1" class="cup-ring-lvl1"></div>
           <div class="crosshair-h"></div>
           <div class="crosshair-v"></div>
           <div id="gBall" class="g-ball"></div>
         </div>
-        <div id="cupReadout" class="cup-Readout">0.00 G</div>
+        <div id="cupReadout" class="cup-readout">0.00 G</div>
       </div>
 
-      <div class="bars-container">
-        <!-- Thanh Tăng tốc -->
+      <!-- HIỂN THỊ KIỂU 1: BIỂU ĐỒ THANH NGANG (BAR CHART) -->
+      <div id="barsView" class="bars-container">
         <div class="bar-item">
           <div class="bar-header">
             <span>🚀 TĂNG TỐC (GA)</span>
             <span id="valGa">0%</span>
           </div>
           <div class="bar-track">
-            <div class="bar-mark-80"></div>
+            <div id="markGa1" class="bar-mark-lvl1"></div>
+            <div id="markGa2" class="bar-mark-lvl2"></div>
             <div id="barGa" class="bar-fill"></div>
           </div>
         </div>
 
-        <!-- Thanh Phanh -->
         <div class="bar-item">
           <div class="bar-header">
             <span>🛑 PHANH (THẮNG)</span>
             <span id="valPhanh">0%</span>
           </div>
           <div class="bar-track">
-            <div class="bar-mark-80"></div>
+            <div id="markPhanh1" class="bar-mark-lvl1"></div>
+            <div id="markPhanh2" class="bar-mark-lvl2"></div>
             <div id="barPhanh" class="bar-fill"></div>
           </div>
         </div>
 
-        <!-- Thanh Vào cua -->
         <div class="bar-item">
           <div class="bar-header">
             <span>🔄 VÀO CUA & LẮC NGANG</span>
             <span id="valCua">0%</span>
           </div>
           <div class="bar-track">
-            <div class="bar-mark-80"></div>
+            <div id="markCua1" class="bar-mark-lvl1"></div>
+            <div id="markCua2" class="bar-mark-lvl2"></div>
             <div id="barCua" class="bar-fill"></div>
           </div>
+        </div>
+      </div>
+
+      <!-- HIỂN THỊ KIỂU 2: BIỂU ĐỒ VÒNG TRÒN (DONUT CHART) -->
+      <div id="donutsView" class="donuts-container hidden">
+        <div class="donut-item">
+          <div class="donut-svg-wrap">
+            <svg class="donut-svg" viewBox="0 0 72 72">
+              <circle class="donut-track" cx="36" cy="36" r="30"></circle>
+              <circle id="donutGa" class="donut-ring" cx="36" cy="36" r="30"></circle>
+            </svg>
+            <span id="donutValGa" class="donut-val">0%</span>
+          </div>
+          <span class="donut-label">🚀 TĂNG TỐC</span>
+        </div>
+
+        <div class="donut-item">
+          <div class="donut-svg-wrap">
+            <svg class="donut-svg" viewBox="0 0 72 72">
+              <circle class="donut-track" cx="36" cy="36" r="30"></circle>
+              <circle id="donutPhanh" class="donut-ring" cx="36" cy="36" r="30"></circle>
+            </svg>
+            <span id="donutValPhanh" class="donut-val">0%</span>
+          </div>
+          <span class="donut-label">🛑 PHANH</span>
+        </div>
+
+        <div class="donut-item">
+          <div class="donut-svg-wrap">
+            <svg class="donut-svg" viewBox="0 0 72 72">
+              <circle class="donut-track" cx="36" cy="36" r="30"></circle>
+              <circle id="donutCua" class="donut-ring" cx="36" cy="36" r="30"></circle>
+            </svg>
+            <span id="donutValCua" class="donut-val">0%</span>
+          </div>
+          <span class="donut-label">🔄 VÀO CUA</span>
         </div>
       </div>
     </div>
@@ -559,23 +735,87 @@
       <button id="btnStart" class="btn-main">
         <span>🎯 CÂN CHỈNH & BẮT ĐẦU</span>
       </button>
-      <button id="btnTestMode" class="btn-test-mode active" title="Khi bật: Cho phép kêu cảnh báo ngay cả khi xe đứng yên 0 km/h">
+      <button id="btnTestMode" class="btn-test-mode active">
         Thử tại chỗ:<br><strong id="testModeState">ĐANG BẬT</strong>
       </button>
     </div>
-  </div> <!-- Đóng thẻ .app-container đúng vị trí -->
+  </div>
 
   <!-- POPUP CÀI ĐẶT -->
   <div id="settingsModal" class="modal-overlay">
     <div class="modal-box">
       <div class="modal-header">
-        <h3>⚙️ Cài đặt ngưỡng & Âm thanh</h3>
+        <h3>⚙️ Cài đặt SmooDri</h3>
         <button id="btnCloseModal" class="btn-icon">Đóng ✕</button>
+      </div>
+
+      <!-- TÙY CHỌN GIAO DIỆN & KIỂU BIỂU ĐỒ -->
+      <div class="section-divider">1. Hiển thị & Giao diện</div>
+
+      <div class="setting-group">
+        <div class="setting-label">
+          <span>Chế độ màu sắc</span>
+          <span id="lblThemeName">Sáng (Light)</span>
+        </div>
+        <div class="option-grid-2">
+          <button class="btn-option" id="btnThemeLight">☀️ Giao diện Sáng</button>
+          <button class="btn-option" id="btnThemeDark">🌙 Giao diện Tối</button>
+        </div>
       </div>
 
       <div class="setting-group">
         <div class="setting-label">
-          <span>Ngưỡng Tăng tốc (Ga tối đa)</span>
+          <span>Kiểu biểu đồ lực G</span>
+          <span id="lblChartType">Thanh ngang (Bar)</span>
+        </div>
+        <div class="option-grid-2">
+          <button class="btn-option" id="btnChartBar">📊 Thanh ngang (Bar)</button>
+          <button class="btn-option" id="btnChartDonut">🍩 Vòng tròn (Donut)</button>
+        </div>
+      </div>
+
+      <!-- CÀI ĐẶT 3 MỨC TIẾNG BÍP CẢNH BÁO (%) -->
+      <div class="section-divider">2. Các mức % phát tiếng Bíp</div>
+
+      <div class="setting-group">
+        <div class="setting-label">
+          <span>Mức 1 - Bíp rời rạc (Nhắc nhẹ)</span>
+          <span id="lblBeepLvl1">70 %</span>
+        </div>
+        <input type="range" id="rngBeepLvl1" min="50" max="85" step="5" value="70" />
+      </div>
+
+      <div class="setting-group">
+        <div class="setting-label">
+          <span>Mức 2 - Bíp nhanh (Cảnh báo)</span>
+          <span id="lblBeepLvl2">80 %</span>
+        </div>
+        <input type="range" id="rngBeepLvl2" min="65" max="95" step="5" value="80" />
+      </div>
+
+      <div class="setting-group">
+        <div class="setting-label">
+          <span>Mức 3 - Bíp liên tục (Vượt ngưỡng)</span>
+          <span id="lblBeepLvl3">100 %</span>
+        </div>
+        <input type="range" id="rngBeepLvl3" min="85" max="120" step="5" value="100" />
+      </div>
+
+      <div class="setting-group">
+        <div class="setting-label"><span>Nghe thử 3 cấp độ tiếng Bíp:</span></div>
+        <div class="option-grid-3">
+          <button class="btn-option" id="btnTestBeep1">🔊 Mức 1</button>
+          <button class="btn-option" id="btnTestBeep2">🔊 Mức 2</button>
+          <button class="btn-option" id="btnTestBeep3">🔊 Mức 3</button>
+        </div>
+      </div>
+
+      <!-- CÀI ĐẶT NGƯỠNG LỰC G TỐI ĐA (100%) -->
+      <div class="section-divider">3. Độ nhạy cảm biến (Mốc 100%)</div>
+
+      <div class="setting-group">
+        <div class="setting-label">
+          <span>Ngưỡng Tăng tốc (Ga 100%)</span>
           <span id="lblMaxGa">0.25 G</span>
         </div>
         <input type="range" id="rngMaxGa" min="0.12" max="0.50" step="0.01" value="0.25" />
@@ -583,7 +823,7 @@
 
       <div class="setting-group">
         <div class="setting-label">
-          <span>Ngưỡng Phanh (Thắng tối đa)</span>
+          <span>Ngưỡng Phanh (Thắng 100%)</span>
           <span id="lblMaxPhanh">0.28 G</span>
         </div>
         <input type="range" id="rngMaxPhanh" min="0.12" max="0.55" step="0.01" value="0.28" />
@@ -591,7 +831,7 @@
 
       <div class="setting-group">
         <div class="setting-label">
-          <span>Ngưỡng Vào cua tối đa</span>
+          <span>Ngưỡng Vào cua (Cua 100%)</span>
           <span id="lblMaxCua">0.25 G</span>
         </div>
         <input type="range" id="rngMaxCua" min="0.12" max="0.50" step="0.01" value="0.25" />
@@ -599,51 +839,17 @@
 
       <div class="setting-group">
         <div class="setting-label">
-          <span>Độ nhạy cảnh báo Lạng lách / Giật lái</span>
+          <span>Độ nhạy bắt lỗi Lạng lách / Giật lái</span>
           <span id="lblMaxJerk">0.35 G/s</span>
         </div>
         <input type="range" id="rngMaxJerk" min="0.18" max="0.70" step="0.02" value="0.35" />
       </div>
-
-      <div class="setting-group">
-        <div class="setting-label">
-          <span>Thời gian nghỉ giữa 2 lần nhắc</span>
-          <span id="lblCooldown">3.0 giây</span>
-        </div>
-        <input type="range" id="rngCooldown" min="1.5" max="8.0" step="0.5" value="3.0" />
-      </div>
-
-      <div class="setting-group">
-        <div class="setting-label">
-          <span>Chế độ giao diện</span>
-          <span id="lblThemeName">Tối (Dark)</span>
-        </div>
-        <div class="sound-test-grid">
-          <button class="btn-sound" id="btnThemeDark" style="background: #0b1120; color: #fff;">🌙 Tối</button>
-          <button class="btn-sound" id="btnThemeLight" style="background: #f8fafc; color: #0f172a; border: 1px solid #cbd5e1;">☀️ Sáng</button>
-        </div>
-      </div>
-
-      <div class="setting-group">
-        <div class="setting-label"><span>Nghe thử 4 file MP3 (từ sounds.json):</span></div>
-        <div class="sound-test-grid">
-          <button class="btn-sound" data-sound="ga">🔊 ga.mp3</button>
-          <button class="btn-sound" data-sound="phanh">🔊 phanh.mp3</button>
-          <button class="btn-sound" data-sound="cua">🔊 cua.mp3</button>
-          <button class="btn-sound" data-sound="lang_lach">🔊 lang_lach.mp3</button>
-        </div>
-      </div>
-
-      <button id="btnReloadSounds" class="btn-update-cache">
-        🔄 Tải lại sounds.json & MP3 mới từ GitHub
-      </button>
-      <div id="audioStatusText" class="audio-status">Đang kiểm tra bộ nhớ âm thanh...</div>
     </div>
   </div>
 
   <script>
     /**************************************************************
-     * 1. ĐĂNG KÝ SERVICE WORKER (NETWORK FIRST)
+     * 1. ĐĂNG KÝ SERVICE WORKER
      **************************************************************/
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -652,54 +858,103 @@
     }
 
     /**************************************************************
-     * 2. QUẢN LÝ CÀI ĐẶT (LƯU LOCALSTORAGE)
+     * 2. QUẢN LÝ CẤU HÌNH NGƯỜI DÙNG (LOCALSTORAGE)
      **************************************************************/
     const defaultConfig = {
       maxGa: 0.25,
       maxPhanh: 0.28,
       maxCua: 0.25,
       maxJerk: 0.35,
-      cooldown: 3.0,
+      beepLvl1: 70,
+      beepLvl2: 80,
+      beepLvl3: 100,
       testMode: true,
-      theme: 'light'
+      theme: 'light',
+      chartType: 'bar' // 'bar' hoặc 'donut'
     };
 
     let config = { ...defaultConfig };
     try {
-      const saved = JSON.parse(localStorage.getItem('drive_smooth_cfg'));
+      const saved = JSON.parse(localStorage.getItem('smoodri_cfg_v2'));
       if (saved) config = { ...defaultConfig, ...saved };
     } catch (e) {}
 
     function saveConfig() {
-      localStorage.setItem('drive_smooth_cfg', JSON.stringify(config));
+      localStorage.setItem('smoodri_cfg_v2', JSON.stringify(config));
     }
 
-    // Áp dụng giao diện Sáng / Tối
+    /**************************************************************
+     * 3. GIAO DIỆN SÁNG/TỐI, KIỂU BIỂU ĐỒ & VẠCH MỐC %
+     **************************************************************/
     function applyTheme(themeName) {
+      config.theme = themeName;
+      const metaTheme = document.getElementById('metaThemeColor');
       if (themeName === 'light') {
         document.documentElement.setAttribute('data-theme', 'light');
         document.getElementById('lblThemeName').textContent = 'Sáng (Light)';
+        document.getElementById('btnThemeLight').classList.add('selected');
+        document.getElementById('btnThemeDark').classList.remove('selected');
+        if (metaTheme) metaTheme.setAttribute('content', '#f1f5f9');
       } else {
         document.documentElement.removeAttribute('data-theme');
         document.getElementById('lblThemeName').textContent = 'Tối (Dark)';
+        document.getElementById('btnThemeDark').classList.add('selected');
+        document.getElementById('btnThemeLight').classList.remove('selected');
+        if (metaTheme) metaTheme.setAttribute('content', '#0b1120');
       }
-      config.theme = themeName;
       saveConfig();
     }
-    applyTheme(config.theme);
+
+    function applyChartType(type) {
+      config.chartType = type;
+      const barsView = document.getElementById('barsView');
+      const donutsView = document.getElementById('donutsView');
+      const btnBar = document.getElementById('btnChartBar');
+      const btnDonut = document.getElementById('btnChartDonut');
+
+      if (type === 'donut') {
+        barsView.classList.add('hidden');
+        donutsView.classList.remove('hidden');
+        btnDonut.classList.add('selected');
+        btnBar.classList.remove('selected');
+        document.getElementById('lblChartType').textContent = 'Vòng tròn (Donut)';
+      } else {
+        donutsView.classList.add('hidden');
+        barsView.classList.remove('hidden');
+        btnBar.classList.add('selected');
+        btnDonut.classList.remove('selected');
+        document.getElementById('lblChartType').textContent = 'Thanh ngang (Bar)';
+      }
+      saveConfig();
+    }
+
+    function updateVisualThresholdMarkers() {
+      // Đảm bảo Lvl1 < Lvl2 < Lvl3 hợp lý
+      const r1 = Math.min(100, Math.round((config.beepLvl1 / config.beepLvl3) * 100));
+      const r2 = Math.min(100, Math.round((config.beepLvl2 / config.beepLvl3) * 100));
+
+      // Cập nhật vòng tròn trong Cốc nước
+      document.getElementById('cupRingLvl1').style.width = `${r1}%`;
+      document.getElementById('cupRingLvl1').style.height = `${r1}%`;
+      document.getElementById('cupRingLvl2').style.width = `${r2}%`;
+      document.getElementById('cupRingLvl2').style.height = `${r2}%`;
+
+      // Cập nhật vạch trên 3 thanh ngang
+      ['Ga', 'Phanh', 'Cua'].forEach((k) => {
+        document.getElementById(`mark${k}1`).style.left = `${Math.min(98, config.beepLvl1)}%`;
+        document.getElementById(`mark${k}2`).style.left = `${Math.min(98, config.beepLvl2)}%`;
+      });
+    }
 
     /**************************************************************
-     * 3. HỆ THỐNG ÂM THANH MP3 OFFLINE (NẠP RAM QUA WEB AUDIO API)
+     * 4. BỘ PHÁT TIẾNG BÍP ĐA CẤP ĐỘ TRỄ 0MS (WEB AUDIO API)
+     * - Mức 1 (70%): Bíp rời rạc (nhịp 650ms, 620Hz)
+     * - Mức 2 (80%): Bíp nhanh (nhịp 280ms, 800Hz)
+     * - Mức 3 (100%): Bíp liên tục dồn dập (nhịp 115ms, 980Hz)
      **************************************************************/
     let audioCtx = null;
-    const audioBuffers = {};
-    let soundUrls = {
-      ga: './ga.mp3',
-      phanh: './phanh.mp3',
-      cua: './cua.mp3',
-      lang_lach: './lang_lach.mp3'
-    };
-    let lastSpokenTime = 0;
+    let lastBeepTime = 0;
+    let lastBeepLevel = 0;
 
     function initAudioContext() {
       if (!audioCtx) {
@@ -711,74 +966,89 @@
       }
     }
 
-    async function loadSoundsFromConfig() {
-      const statusEl = document.getElementById('audioStatusText');
-      try {
-        initAudioContext();
-        const res = await fetch('./sounds.json');
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.files) {
-            soundUrls = { ...soundUrls, ...data.files };
-          }
-        }
-      } catch (e) {}
+    function emitSingleBeep(freq, durationMs, waveType = 'sine', volume = 0.28) {
+      initAudioContext();
+      if (!audioCtx) return;
 
-      let loadedCount = 0;
-      const keys = Object.keys(soundUrls);
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
 
-      for (const key of keys) {
-        try {
-          const response = await fetch(soundUrls[key]);
-          if (response.ok) {
-            const arrayBuffer = await response.arrayBuffer();
-            audioBuffers[key] = await audioCtx.decodeAudioData(arrayBuffer);
-            loadedCount++;
-          }
-        } catch (err) {}
+      osc.type = waveType;
+      osc.frequency.setValueAtTime(freq, now);
+
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(volume, now + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + durationMs / 1000);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start(now);
+      osc.stop(now + durationMs / 1000 + 0.015);
+    }
+
+    function handleDynamicBeep(level) {
+      if (level <= 0) {
+        lastBeepLevel = 0;
+        return;
       }
 
-      if (loadedCount === keys.length) {
-        statusEl.textContent = `Đã nạp đủ ${loadedCount}/${keys.length} file MP3 vào bộ nhớ Offline.`;
-        statusEl.style.color = 'var(--green)';
-      } else {
-        statusEl.textContent = `Đã nạp ${loadedCount}/${keys.length} file MP3 (Dùng tiếng bíp cho file thiếu).`;
-        statusEl.style.color = 'var(--yellow)';
+      const now = performance.now();
+      let intervalMs = 650;
+      let freq = 620;
+      let duration = 85;
+      let wave = 'sine';
+
+      if (level === 1) {
+        intervalMs = 650; // Rời rạc
+        freq = 640;
+        duration = 80;
+        wave = 'sine';
+      } else if (level === 2) {
+        intervalMs = 280; // Nhanh hơn
+        freq = 820;
+        duration = 90;
+        wave = 'triangle';
+      } else if (level >= 3) {
+        intervalMs = 115; // Liên tục dồn dập
+        freq = 1020;
+        duration = 75;
+        wave = 'sawtooth';
+      }
+
+      // Phát ngay lập tức nếu mức cảnh báo vừa tăng lên hoặc đã đủ nhịp thời gian
+      const levelEscalated = level > lastBeepLevel && now - lastBeepTime > 110;
+      if (levelEscalated || now - lastBeepTime >= intervalMs) {
+        lastBeepTime = now;
+        lastBeepLevel = level;
+        emitSingleBeep(freq, duration, wave);
       }
     }
 
-    function playAlertSound(type, forcePlay = false) {
-      const now = performance.now();
-      if (!forcePlay && now - lastSpokenTime < config.cooldown * 1000) {
-        return;
-      }
-      lastSpokenTime = now;
-
+    // Hàm phát thử chuỗi bíp trong bảng Cài đặt
+    function playPreviewBeepPattern(level) {
       initAudioContext();
-
-      if (audioBuffers[type]) {
-        const source = audioCtx.createBufferSource();
-        source.buffer = audioBuffers[type];
-        source.connect(audioCtx.destination);
-        source.start(0);
+      if (level === 1) {
+        emitSingleBeep(640, 80, 'sine');
+        setTimeout(() => emitSingleBeep(640, 80, 'sine'), 550);
+      } else if (level === 2) {
+        for (let i = 0; i < 3; i++) {
+          setTimeout(() => emitSingleBeep(820, 90, 'triangle'), i * 260);
+        }
       } else {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = type === 'lang_lach' ? 'sawtooth' : 'sine';
-        osc.frequency.setValueAtTime(type === 'lang_lach' ? 880 : 660, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.35);
+        for (let i = 0; i < 5; i++) {
+          setTimeout(() => emitSingleBeep(1020, 70, 'sawtooth'), i * 115);
+        }
       }
     }
 
     /**************************************************************
-     * 4. THUẬT TOÁN CẢM BIẾN & ĐÈO DỐC
+     * 5. THUẬT TOÁN CẢM BIẾN 3D, BÙ DỐC ĐƯỜNG ĐÈO & LẠNG LÁCH
      **************************************************************/
     let isRunning = false;
+    let needsCalibration = false;
+    let hasSensorData = false;
     let smoothnessScore = 100;
     let wakeLock = null;
     let gpsWatchId = null;
@@ -788,16 +1058,34 @@
     let lastAltitude = null;
     let altitudeDelta = 0;
 
-    let manualOffset = { x: 0, y: 0 };
-    let rawSensor = { x: 0, y: 0, z: 0 };
+    // Vector trọng lực gốc khi bấm Cân chỉnh (Hỗ trợ mọi góc gắn máy: nằm phẳng, 45° hay dựng đứng 90°)
+    let manualOffset = { x: 0, y: 0, z: 1 };
+    let rawSensor = { x: 0, y: 0, z: 1 };
 
-    let slopeBaseline = { x: 0, y: 0 };
-    let smoothG = { x: 0, y: 0 };
+    let slopeBaseline = { x: 0, lon: 0 };
+    let smoothG = { x: 0, lon: 0 };
     let prevLateralG = 0;
     let prevTimestamp = performance.now();
 
     let reversalTimestamps = [];
     let lastSignX = 0;
+
+    function calibrateZeroG() {
+      if (hasSensorData) {
+        manualOffset.x = rawSensor.x;
+        manualOffset.y = rawSensor.y;
+        manualOffset.z = rawSensor.z;
+        needsCalibration = false;
+      } else {
+        // Nếu cảm biến chưa kịp gửi gói tin đầu tiên, đặt cờ để tự cân chỉnh ở gói tin đầu tiên
+        needsCalibration = true;
+      }
+      slopeBaseline.x = 0;
+      slopeBaseline.lon = 0;
+      smoothG.x = 0;
+      smoothG.lon = 0;
+      reversalTimestamps = [];
+    }
 
     function startBackgroundGPS() {
       if (!('geolocation' in navigator)) return;
@@ -856,34 +1144,51 @@
       rawSensor.x = gxRaw;
       rawSensor.y = gyRaw;
       rawSensor.z = gzRaw;
+      hasSensorData = true;
 
+      if (needsCalibration) {
+        calibrateZeroG();
+      }
+
+      // 1. TÍNH LỰC NGANG (X) & LỰC DỌC TĂNG TỐC/PHANH (Gộp trục Y-Z theo góc gắn máy)
       const xCal = gxRaw - manualOffset.x;
-      const yCal = gyRaw - manualOffset.y;
+      const dy = gyRaw - manualOffset.y;
+      const dz = gzRaw - manualOffset.z;
 
+      const normYZ = Math.hypot(manualOffset.y, manualOffset.z);
+      let lonCal = dy;
+      if (normYZ > 0.25) {
+        // Phép chiếu vuông góc với vector trọng lực ban đầu trong mặt phẳng Y-Z
+        lonCal = (dy * manualOffset.z - dz * manualOffset.y) / normYZ;
+      }
+
+      // 2. TỰ ĐỘNG PHÁT HIỆN ĐỘ DỐC ĐƯỜNG ĐÈO & BÙ DỐC (~4 giây)
       const slopeAlpha = Math.min(dt / 4.0, 0.05);
       slopeBaseline.x += (xCal - slopeBaseline.x) * slopeAlpha;
-      slopeBaseline.y += (yCal - slopeBaseline.y) * slopeAlpha;
+      slopeBaseline.lon += (lonCal - slopeBaseline.lon) * slopeAlpha;
 
-      const pitchRad = Math.atan2(slopeBaseline.y, Math.sqrt(gxRaw * gxRaw + gzRaw * gzRaw) || 1);
-      const slopeDeg = Math.round(Math.abs(pitchRad * (180 / Math.PI)));
+      const slopeDeg = Math.round(Math.abs(Math.asin(Math.max(-1, Math.min(1, slopeBaseline.lon))) * (180 / Math.PI)));
       const isMountainPass = slopeDeg >= 3 || altitudeDelta > 1.5;
-
       updateSlopeBadge(slopeDeg, isMountainPass);
 
+      // 3. TÍNH LỰC G ĐỘNG TÁC ĐỘNG LÊN NGƯỜI NGỒI SAU
       let dynamicX = xCal - slopeBaseline.x;
-      let dynamicY = yCal - slopeBaseline.y;
+      let dynamicLon = lonCal - slopeBaseline.lon;
 
       if (lin && lin.x !== null && lin.y !== null) {
         const linX = lin.x / 9.80665;
         const linY = lin.y / 9.80665;
+        const linZ = (lin.z || 0) / 9.80665;
+        const linLon = normYZ > 0.25 ? (linY * manualOffset.z - linZ * manualOffset.y) / normYZ : linY;
         dynamicX = dynamicX * 0.5 + linX * 0.5;
-        dynamicY = dynamicY * 0.5 + linY * 0.5;
+        dynamicLon = dynamicLon * 0.5 + linLon * 0.5;
       }
 
       const smoothAlpha = 0.22;
       smoothG.x += (dynamicX - smoothG.x) * smoothAlpha;
-      smoothG.y += (dynamicY - smoothG.y) * smoothAlpha;
+      smoothG.lon += (dynamicLon - smoothG.lon) * smoothAlpha;
 
+      // 4. PHÁT HIỆN LẠNG LÁCH / GIẬT VÔ LĂNG
       const lateralJerk = Math.abs(smoothG.x - prevLateralG) / dt;
       prevLateralG = smoothG.x;
 
@@ -900,7 +1205,7 @@
         reversalTimestamps.length >= 2 ||
         (lateralJerk > config.maxJerk && Math.abs(smoothG.x) > config.maxCua * 0.65);
 
-      evaluateAndRender(smoothG.x, smoothG.y, isWeaving, dt);
+      evaluateAndRender(smoothG.x, smoothG.lon, isWeaving, dt);
     }
 
     function updateSlopeBadge(deg, isMountain) {
@@ -915,93 +1220,145 @@
       }
     }
 
-    function evaluateAndRender(gx, gy, isWeaving, dt) {
-      const accelG = Math.max(0, gy);
-      const brakeG = Math.max(0, -gy);
+    function getLevelColor(pct) {
+      if (pct >= config.beepLvl3) return 'var(--red)';
+      if (pct >= config.beepLvl2) return 'var(--orange)';
+      if (pct >= config.beepLvl1) return 'var(--yellow)';
+      return 'var(--green)';
+    }
+
+    function updateMetricDisplay(key, pct) {
+      const color = getLevelColor(pct);
+      const clamped = Math.min(100, pct);
+
+      // Cập nhật Thanh ngang (Bar)
+      const bar = document.getElementById(`bar${key}`);
+      const val = document.getElementById(`val${key}`);
+      bar.style.width = `${clamped}%`;
+      bar.style.backgroundColor = color;
+      val.textContent = `${pct}%`;
+
+      // Cập nhật Vòng tròn (Donut) - Chu vi r=30 là 188.5
+      const ring = document.getElementById(`donut${key}`);
+      const dVal = document.getElementById(`donutVal${key}`);
+      const circumference = 188.5;
+      const offset = circumference - (clamped / 100) * circumference;
+      ring.style.strokeDashoffset = offset;
+      ring.style.stroke = color;
+      dVal.textContent = `${pct}%`;
+      dVal.style.color = pct >= config.beepLvl1 ? color : 'var(--text)';
+    }
+
+    function evaluateAndRender(gx, glon, isWeaving, dt) {
+      const accelG = Math.max(0, glon);
+      const brakeG = Math.max(0, -glon);
       const cornerG = Math.abs(gx);
-      const totalG = Math.hypot(gx, gy);
+      const totalG = Math.hypot(gx, glon);
 
-      const pctGa = Math.min(120, Math.round((accelG / config.maxGa) * 100));
-      const pctPhanh = Math.min(120, Math.round((brakeG / config.maxPhanh) * 100));
-      const pctCua = Math.min(120, Math.round((cornerG / config.maxCua) * 100));
+      const pctGa = Math.min(130, Math.round((accelG / config.maxGa) * 100));
+      const pctPhanh = Math.min(130, Math.round((brakeG / config.maxPhanh) * 100));
+      const pctCua = Math.min(130, Math.round((cornerG / config.maxCua) * 100));
+      const maxPct = Math.max(pctGa, pctPhanh, pctCua);
 
-      updateBar('barGa', 'valGa', pctGa);
-      updateBar('barPhanh', 'valPhanh', pctPhanh);
-      updateBar('barCua', 'valCua', pctCua);
+      updateMetricDisplay('Ga', pctGa);
+      updateMetricDisplay('Phanh', pctPhanh);
+      updateMetricDisplay('Cua', pctCua);
 
+      // Cập nhật vị trí chấm tròn theo bán kính thực tế của Cốc nước trên màn hình
+      const cupEl = document.getElementById('cupCircle');
+      const maxRadiusPx = Math.max(45, cupEl.clientWidth / 2 - 14);
       const maxRef = Math.max(config.maxGa, config.maxPhanh, config.maxCua);
       const normX = Math.max(-1, Math.min(1, gx / maxRef));
-      const normY = Math.max(-1, Math.min(1, gy / maxRef));
-      const radiusPx = 68;
+      const normY = Math.max(-1, Math.min(1, glon / maxRef));
+
       const ball = document.getElementById('gBall');
-      ball.style.transform = `translate(${normX * radiusPx}px, ${-normY * radiusPx}px)`;
+      const ballColor = isWeaving ? 'var(--red)' : getLevelColor(maxPct);
+      ball.style.transform = `translate(${normX * maxRadiusPx}px, ${-normY * maxRadiusPx}px)`;
+      ball.style.background = ballColor;
+      ball.style.boxShadow = `0 0 12px ${ballColor}`;
       document.getElementById('cupReadout').textContent = `${totalG.toFixed(2)} G`;
 
       const isParked = !config.testMode && hasGpsFix && currentSpeedKmh < 5;
       const banner = document.getElementById('alertBanner');
       const title = document.getElementById('alertTitle');
       const sub = document.getElementById('alertSub');
-
       banner.className = 'alert-banner';
 
       if (isParked) {
         title.textContent = 'XE ĐANG ĐỖ';
-        sub.textContent = 'Tạm khóa âm thanh dưới 5 km/h';
+        sub.textContent = 'Tạm khóa tiếng bíp dưới 5 km/h';
+        handleDynamicBeep(0);
         return;
       }
 
+      // Xác định thao tác nào đang chiếm ưu thế
+      let dominantAction = 'GA';
+      if (pctPhanh >= pctGa && pctPhanh >= pctCua) dominantAction = 'PHANH';
+      else if (pctCua >= pctGa) dominantAction = 'CUA';
+
+      // Cấp độ 3: Lạng lách hoặc Vượt ngưỡng Mức 3 (Mặc định 100%)
       if (isWeaving) {
         banner.classList.add('warn-100');
         title.textContent = '⚠️ LẠNG LÁCH / GIẬT LÁI!';
         sub.textContent = 'Giữ đều vô lăng khi ôm cua';
-        ball.style.background = 'var(--red)';
-        ball.style.boxShadow = '0 0 14px var(--red)';
         smoothnessScore = Math.max(0, smoothnessScore - dt * 12);
-        playAlertSound('lang_lach');
-      } else if (pctPhanh >= 100 || pctGa >= 100 || pctCua >= 100) {
+        handleDynamicBeep(3);
+      } else if (maxPct >= config.beepLvl3) {
         banner.classList.add('warn-100');
-        ball.style.background = 'var(--red)';
-        ball.style.boxShadow = '0 0 14px var(--red)';
         smoothnessScore = Math.max(0, smoothnessScore - dt * 9);
+        handleDynamicBeep(3);
 
-        if (pctPhanh >= pctGa && pctPhanh >= pctCua) {
-          title.textContent = '🛑 PHANH GẤP (100%)';
-          sub.textContent = 'Nới nhẹ chân phanh!';
-          playAlertSound('phanh');
-        } else if (pctCua >= pctGa) {
-          title.textContent = '🔄 VÀO CUA GẮT (100%)';
-          sub.textContent = 'Giảm tốc và trả lái mượt';
-          playAlertSound('cua');
+        if (dominantAction === 'PHANH') {
+          title.textContent = `🛑 PHANH GẤP (${pctPhanh}%)`;
+          sub.textContent = 'Vượt ngưỡng! Nới nhẹ chân phanh';
+        } else if (dominantAction === 'CUA') {
+          title.textContent = `🔄 VÀO CUA GẮT (${pctCua}%)`;
+          sub.textContent = 'Vượt ngưỡng! Giảm tốc & trả lái mượt';
         } else {
-          title.textContent = '🚀 THỐC GA MẠNH (100%)';
-          sub.textContent = 'Nhả nhẹ chân ga';
-          playAlertSound('ga');
+          title.textContent = `🚀 THỐC GA MẠNH (${pctGa}%)`;
+          sub.textContent = 'Vượt ngưỡng! Nhả nhẹ chân ga';
         }
-      } else if (pctPhanh >= 80 || pctGa >= 80 || pctCua >= 80) {
+      }
+      // Cấp độ 2: Chạm ngưỡng Mức 2 (Mặc định 80% - Bíp nhanh)
+      else if (maxPct >= config.beepLvl2) {
         banner.classList.add('warn-80');
-        ball.style.background = 'var(--yellow)';
-        ball.style.boxShadow = '0 0 12px var(--yellow)';
-        smoothnessScore = Math.max(0, smoothnessScore - dt * 3);
+        smoothnessScore = Math.max(0, smoothnessScore - dt * 3.5);
+        handleDynamicBeep(2);
 
-        if (pctPhanh >= pctGa && pctPhanh >= pctCua) {
-          title.textContent = '⚠️ RÀ PHANH ÊM (80%)';
-          sub.textContent = 'Chạm 80% ngưỡng phanh';
-          playAlertSound('phanh');
-        } else if (pctCua >= pctGa) {
-          title.textContent = '⚠️ ÔM CUA ÊM (80%)';
-          sub.textContent = 'Chạm 80% ngưỡng vào cua';
-          playAlertSound('cua');
+        if (dominantAction === 'PHANH') {
+          title.textContent = `⚠️ RÀ PHANH ÊM (${pctPhanh}%)`;
+          sub.textContent = `Đã vượt ${config.beepLvl2}% ngưỡng phanh`;
+        } else if (dominantAction === 'CUA') {
+          title.textContent = `⚠️ ÔM CUA ÊM (${pctCua}%)`;
+          sub.textContent = `Đã vượt ${config.beepLvl2}% ngưỡng vào cua`;
         } else {
-          title.textContent = '⚠️ ĐỀU CHÂN GA (80%)';
-          sub.textContent = 'Chạm 80% ngưỡng tăng tốc';
-          playAlertSound('ga');
+          title.textContent = `⚠️ ĐỀU CHÂN GA (${pctGa}%)`;
+          sub.textContent = `Đã vượt ${config.beepLvl2}% ngưỡng tăng tốc`;
         }
-      } else {
-        ball.style.background = 'var(--green)';
-        ball.style.boxShadow = '0 0 12px var(--green)';
+      }
+      // Cấp độ 1: Chạm ngưỡng Mức 1 (Mặc định 70% - Bíp rời rạc)
+      else if (maxPct >= config.beepLvl1) {
+        banner.classList.add('warn-70');
+        smoothnessScore = Math.max(0, smoothnessScore - dt * 1.0);
+        handleDynamicBeep(1);
+
+        if (dominantAction === 'PHANH') {
+          title.textContent = `CHỚM MỨC PHANH (${pctPhanh}%)`;
+          sub.textContent = 'Giữ nguyên hoặc nới nhẹ chân phanh';
+        } else if (dominantAction === 'CUA') {
+          title.textContent = `CHỚM MỨC CUA (${pctCua}%)`;
+          sub.textContent = 'Giữ đều góc vô lăng';
+        } else {
+          title.textContent = `CHỚM MỨC GA (${pctGa}%)`;
+          sub.textContent = 'Giữ đều chân ga hiện tại';
+        }
+      }
+      // Lái xe êm ái (< Mức 1)
+      else {
+        handleDynamicBeep(0);
         title.textContent = 'LÁI XE ÊM ÁI';
         sub.textContent = 'Người ngồi sau rất thoải mái';
-        smoothnessScore = Math.min(100, smoothnessScore + dt * 1.2);
+        smoothnessScore = Math.min(100, smoothnessScore + dt * 1.4);
       }
 
       const scoreEl = document.getElementById('scoreValue');
@@ -1011,31 +1368,15 @@
         roundedScore >= 85 ? 'var(--green)' : roundedScore >= 65 ? 'var(--yellow)' : 'var(--red)';
     }
 
-    function updateBar(barId, valId, pct) {
-      const bar = document.getElementById(barId);
-      const val = document.getElementById(valId);
-      const clampedWidth = Math.min(100, pct);
-      bar.style.width = `${clampedWidth}%`;
-      val.textContent = `${pct}%`;
-
-      if (pct >= 100) {
-        bar.style.backgroundColor = 'var(--red)';
-      } else if (pct >= 80) {
-        bar.style.backgroundColor = 'var(--yellow)';
-      } else {
-        bar.style.backgroundColor = 'var(--green)';
-      }
-    }
-
     /**************************************************************
-     * 5. SỰ KIỆN NÚT BẤM & KHỞI ĐỘNG (GỘP CÂN CHỈNH & BẮT ĐẦU)
+     * 6. SỰ KIỆN NÚT BẤM & CÀI ĐẶT
      **************************************************************/
     const btnStart = document.getElementById('btnStart');
+    const btnQuickCalib = document.getElementById('btnQuickCalib');
     const btnTestMode = document.getElementById('btnTestMode');
 
     btnStart.addEventListener('click', async () => {
       initAudioContext();
-      await loadSoundsFromConfig();
 
       if (!isRunning) {
         if (
@@ -1051,16 +1392,9 @@
           } catch (e) {}
         }
 
-        // Tự động cân chỉnh ngay khi bấm bắt đầu
-        manualOffset.x = rawSensor.x;
-        manualOffset.y = rawSensor.y;
-        slopeBaseline.x = 0;
-        slopeBaseline.y = 0;
-        smoothG.x = 0;
-        smoothG.y = 0;
-
         isRunning = true;
         prevTimestamp = performance.now();
+        calibrateZeroG();
         window.addEventListener('devicemotion', handleMotion);
         startBackgroundGPS();
         requestWakeLock();
@@ -1068,11 +1402,13 @@
         btnStart.classList.add('running');
         btnStart.innerHTML = '<span>⏹ DỪNG LẠI</span>';
         document.getElementById('alertTitle').textContent = 'ĐANG THEO DÕI';
-        document.getElementById('alertSub').textContent = 'Đã cân chỉnh 0G - Xe bắt đầu lăn bánh';
+        document.getElementById('alertSub').textContent = 'Đã cân chỉnh 0G - Sẵn sàng lăn bánh';
+        emitSingleBeep(700, 60, 'sine', 0.15);
       } else {
         isRunning = false;
         window.removeEventListener('devicemotion', handleMotion);
         stopBackgroundGPS();
+        handleDynamicBeep(0);
         if (wakeLock) {
           wakeLock.release().catch(() => {});
           wakeLock = null;
@@ -1084,6 +1420,14 @@
         document.getElementById('alertTitle').textContent = 'ĐÃ TẠM DỪNG';
         document.getElementById('alertSub').textContent = 'Bấm nút dưới để cân chỉnh & chạy lại';
       }
+    });
+
+    btnQuickCalib.addEventListener('click', () => {
+      calibrateZeroG();
+      initAudioContext();
+      emitSingleBeep(880, 50, 'sine', 0.15);
+      document.getElementById('alertTitle').textContent = 'ĐÃ ĐẶT LẠI TÂM 0G';
+      document.getElementById('alertSub').textContent = 'Đã nhận góc nghiêng hiện tại làm gốc';
     });
 
     function renderTestModeButton() {
@@ -1103,66 +1447,55 @@
       renderTestModeButton();
     });
 
-    /**************************************************************
-     * 6. XỬ LÝ POPUP CÀI ĐẶT & GIAO DIỆN SÁNG/TỐI
-     **************************************************************/
+    // Mở / Đóng Cài đặt
     const modal = document.getElementById('settingsModal');
     document.getElementById('btnSettings').addEventListener('click', () => {
       initAudioContext();
-      loadSoundsFromConfig();
       modal.classList.add('open');
     });
     document.getElementById('btnCloseModal').addEventListener('click', () => {
       modal.classList.remove('open');
     });
 
-    // Nút chuyển đổi giao diện trong cài đặt
-    document.getElementById('btnThemeDark').addEventListener('click', () => {
-      applyTheme('dark');
-    });
+    // Chọn Giao diện Sáng / Tối & Kiểu biểu đồ Bar / Donut
+    document.getElementById('btnThemeLight').addEventListener('click', () => applyTheme('light'));
+    document.getElementById('btnThemeDark').addEventListener('click', () => applyTheme('dark'));
+    document.getElementById('btnChartBar').addEventListener('click', () => applyChartType('bar'));
+    document.getElementById('btnChartDonut').addEventListener('click', () => applyChartType('donut'));
 
-    document.getElementById('btnThemeLight').addEventListener('click', () => {
-      applyTheme('light');
-    });
+    // Nghe thử 3 cấp độ Bíp
+    document.getElementById('btnTestBeep1').addEventListener('click', () => playPreviewBeepPattern(1));
+    document.getElementById('btnTestBeep2').addEventListener('click', () => playPreviewBeepPattern(2));
+    document.getElementById('btnTestBeep3').addEventListener('click', () => playPreviewBeepPattern(3));
 
-    function bindSlider(sliderId, labelId, cfgKey, unit) {
+    function bindSlider(sliderId, labelId, cfgKey, unit, decimals = 2) {
       const slider = document.getElementById(sliderId);
       const label = document.getElementById(labelId);
       slider.value = config[cfgKey];
-      label.textContent = `${Number(config[cfgKey]).toFixed(unit === 'giây' ? 1 : 2)} ${unit}`;
+      label.textContent = `${Number(config[cfgKey]).toFixed(decimals)} ${unit}`;
 
       slider.addEventListener('input', (e) => {
         const val = parseFloat(e.target.value);
         config[cfgKey] = val;
-        label.textContent = `${val.toFixed(unit === 'giây' ? 1 : 2)} ${unit}`;
+        label.textContent = `${val.toFixed(decimals)} ${unit}`;
+        updateVisualThresholdMarkers();
         saveConfig();
       });
     }
 
-    bindSlider('rngMaxGa', 'lblMaxGa', 'maxGa', 'G');
-    bindSlider('rngMaxPhanh', 'lblMaxPhanh', 'maxPhanh', 'G');
-    bindSlider('rngMaxCua', 'lblMaxCua', 'maxCua', 'G');
-    bindSlider('rngMaxJerk', 'lblMaxJerk', 'maxJerk', 'G/s');
-    bindSlider('rngCooldown', 'lblCooldown', 'cooldown', 'giây');
+    bindSlider('rngBeepLvl1', 'lblBeepLvl1', 'beepLvl1', '%', 0);
+    bindSlider('rngBeepLvl2', 'lblBeepLvl2', 'beepLvl2', '%', 0);
+    bindSlider('rngBeepLvl3', 'lblBeepLvl3', 'beepLvl3', '%', 0);
+    bindSlider('rngMaxGa', 'lblMaxGa', 'maxGa', 'G', 2);
+    bindSlider('rngMaxPhanh', 'lblMaxPhanh', 'maxPhanh', 'G', 2);
+    bindSlider('rngMaxCua', 'lblMaxCua', 'maxCua', 'G', 2);
+    bindSlider('rngMaxJerk', 'lblMaxJerk', 'maxJerk', 'G/s', 2);
+
+    // Khởi chạy trạng thái ban đầu
+    applyTheme(config.theme);
+    applyChartType(config.chartType);
+    updateVisualThresholdMarkers();
     renderTestModeButton();
-
-    document.querySelectorAll('.btn-sound').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const soundKey = btn.getAttribute('data-sound');
-        playAlertSound(soundKey, true);
-      });
-    });
-
-    document.getElementById('btnReloadSounds').addEventListener('click', async () => {
-      const statusEl = document.getElementById('audioStatusText');
-      statusEl.textContent = 'Đang tải lại sounds.json và MP3 từ GitHub...';
-      statusEl.style.color = 'var(--blue)';
-
-      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({ action: 'UPDATE_SOUNDS' });
-      }
-      await loadSoundsFromConfig();
-    });
   </script>
 </body>
 </html>

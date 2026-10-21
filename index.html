@@ -775,38 +775,22 @@
       </div>
 
       <!-- CÀI ĐẶT 3 MỨC TIẾNG BÍP CẢNH BÁO (%) -->
-      <div class="section-divider">2. Các mức % phát tiếng Bíp</div>
+      <!-- CÀI ĐẶT MỨC BẮT ĐẦU BÍP TUYẾN TÍNH -->
+      <div class="section-divider">2. Cảnh báo Tiếng Bíp tuyến tính</div>
 
       <div class="setting-group">
         <div class="setting-label">
-          <span>Mức 1 - Bíp rời rạc (Nhắc nhẹ)</span>
-          <span id="lblBeepLvl1">70 %</span>
+          <span>Mức bắt đầu phát tiếng bíp</span>
+          <span id="lblStartBeep">70 %</span>
         </div>
-        <input type="range" id="rngBeepLvl1" min="50" max="85" step="5" value="70" />
+        <input type="range" id="rngStartBeep" min="50" max="90" step="5" value="70" />
       </div>
 
       <div class="setting-group">
-        <div class="setting-label">
-          <span>Mức 2 - Bíp nhanh (Cảnh báo)</span>
-          <span id="lblBeepLvl2">80 %</span>
-        </div>
-        <input type="range" id="rngBeepLvl2" min="65" max="95" step="5" value="80" />
-      </div>
-
-      <div class="setting-group">
-        <div class="setting-label">
-          <span>Mức 3 - Bíp liên tục (Vượt ngưỡng)</span>
-          <span id="lblBeepLvl3">100 %</span>
-        </div>
-        <input type="range" id="rngBeepLvl3" min="85" max="120" step="5" value="100" />
-      </div>
-
-      <div class="setting-group">
-        <div class="setting-label"><span>Nghe thử 3 cấp độ tiếng Bíp:</span></div>
-        <div class="option-grid-3">
-          <button class="btn-option" id="btnTestBeep1">🔊 Mức 1</button>
-          <button class="btn-option" id="btnTestBeep2">🔊 Mức 2</button>
-          <button class="btn-option" id="btnTestBeep3">🔊 Mức 3</button>
+        <div class="setting-label"><span>Nghe thử âm thanh cảnh báo:</span></div>
+        <div class="option-grid-2">
+          <button class="btn-option" id="btnTestBeepLow">🔊 Nghe thử lúc chớm bíp</button>
+          <button class="btn-option" id="btnTestBeepHigh">🔊 Nghe thử lúc kịch đỉnh (100%)</button>
         </div>
       </div>
 
@@ -865,12 +849,10 @@
       maxPhanh: 0.28,
       maxCua: 0.25,
       maxJerk: 0.35,
-      beepLvl1: 70,
-      beepLvl2: 80,
-      beepLvl3: 100,
+      startBeep: 70, // Mức phần trăm bắt đầu kêu bíp
       testMode: true,
       theme: 'light',
-      chartType: 'bar' // 'bar' hoặc 'donut'
+      chartType: 'bar'
     };
 
     let config = { ...defaultConfig };
@@ -947,14 +929,10 @@
     }
 
     /**************************************************************
-     * 4. BỘ PHÁT TIẾNG BÍP ĐA CẤP ĐỘ TRỄ 0MS (WEB AUDIO API)
-     * - Mức 1 (70%): Bíp rời rạc (nhịp 650ms, 620Hz)
-     * - Mức 2 (80%): Bíp nhanh (nhịp 280ms, 800Hz)
-     * - Mức 3 (100%): Bíp liên tục dồn dập (nhịp 115ms, 980Hz)
+     * 4. BỘ PHÁT TIẾNG BÍP TUYẾN TÍNH (ĐỘ TRỄ 0MS)
      **************************************************************/
     let audioCtx = null;
     let lastBeepTime = 0;
-    let lastBeepLevel = 0;
 
     function initAudioContext() {
       if (!audioCtx) {
@@ -966,7 +944,7 @@
       }
     }
 
-    function emitSingleBeep(freq, durationMs, waveType = 'sine', volume = 0.28) {
+    function emitSingleBeep(freq, durationMs, waveType = 'sine', volume = 0.25) {
       initAudioContext();
       if (!audioCtx) return;
 
@@ -985,61 +963,32 @@
       gain.connect(audioCtx.destination);
 
       osc.start(now);
-      osc.stop(now + durationMs / 1000 + 0.015);
+      osc.stop(now + durationMs / 1000 + 0.02);
     }
 
-    function handleDynamicBeep(level) {
-      if (level <= 0) {
-        lastBeepLevel = 0;
+    // Thuật toán tuyến tính: Lực G càng lớn thì nhịp bíp càng ngắn, tần số càng cao
+    function handleLinearBeep(maxPct) {
+      const startLimit = config.startBeep || 70;
+      if (maxPct < startLimit) {
+        lastBeepTime = 0;
         return;
       }
 
       const now = performance.now();
-      let intervalMs = 650;
-      let freq = 620;
-      let duration = 85;
-      let wave = 'sine';
 
-      if (level === 1) {
-        intervalMs = 650; // Rời rạc
-        freq = 640;
-        duration = 80;
-        wave = 'sine';
-      } else if (level === 2) {
-        intervalMs = 280; // Nhanh hơn
-        freq = 820;
-        duration = 90;
-        wave = 'triangle';
-      } else if (level >= 3) {
-        intervalMs = 115; // Liên tục dồn dập
-        freq = 1020;
-        duration = 75;
-        wave = 'sawtooth';
-      }
+      // Chuẩn hóa tỷ lệ từ startLimit (ví dụ 70%) đến 100% (hoặc hơn)
+      const ratio = Math.min(1, (maxPct - startLimit) / (100 - startLimit));
 
-      // Phát ngay lập tức nếu mức cảnh báo vừa tăng lên hoặc đã đủ nhịp thời gian
-      const levelEscalated = level > lastBeepLevel && now - lastBeepTime > 110;
-      if (levelEscalated || now - lastBeepTime >= intervalMs) {
+      // Tuyến tính hóa khoảng thời gian giữa 2 tiếng bíp: từ 650ms (chớm bíp) rút ngắn mượt xuống 120ms (kịch 100%)
+      const intervalMs = Math.round(650 - ratio * (650 - 120));
+
+      // Tần số âm thanh cao dần từ 600Hz lên 1020Hz để tạo cảm giác cấp bách
+      const freq = Math.round(600 + ratio * 420);
+      const wave = ratio > 0.7 ? 'triangle' : 'sine';
+
+      if (now - lastBeepTime >= intervalMs) {
         lastBeepTime = now;
-        lastBeepLevel = level;
-        emitSingleBeep(freq, duration, wave);
-      }
-    }
-
-    // Hàm phát thử chuỗi bíp trong bảng Cài đặt
-    function playPreviewBeepPattern(level) {
-      initAudioContext();
-      if (level === 1) {
-        emitSingleBeep(640, 80, 'sine');
-        setTimeout(() => emitSingleBeep(640, 80, 'sine'), 550);
-      } else if (level === 2) {
-        for (let i = 0; i < 3; i++) {
-          setTimeout(() => emitSingleBeep(820, 90, 'triangle'), i * 260);
-        }
-      } else {
-        for (let i = 0; i < 5; i++) {
-          setTimeout(() => emitSingleBeep(1020, 70, 'sawtooth'), i * 115);
-        }
+        emitSingleBeep(freq, 75, wave, 0.28);
       }
     }
 
@@ -1297,61 +1246,36 @@
       else if (pctCua >= pctGa) dominantAction = 'CUA';
 
       // Cấp độ 3: Lạng lách hoặc Vượt ngưỡng Mức 3 (Mặc định 100%)
+      const maxPct = Math.max(pctGa, pctPhanh, pctCua);
+      updateMetricDisplay('Ga', pctGa);
+      updateMetricDisplay('Phanh', pctPhanh);
+      updateMetricDisplay('Cua', pctCua);
+
+      // Gọi tiếng bíp tuyến tính theo % lực G lớn nhất
       if (isWeaving) {
         banner.classList.add('warn-100');
         title.textContent = '⚠️ LẠNG LÁCH / GIẬT LÁI!';
         sub.textContent = 'Giữ đều vô lăng khi ôm cua';
         smoothnessScore = Math.max(0, smoothnessScore - dt * 12);
-        handleDynamicBeep(3);
-      } else if (maxPct >= config.beepLvl3) {
+        handleLinearBeep(110); // Ép nhịp bíp dồn dập tối đa
+      } else if (maxPct >= 100) {
         banner.classList.add('warn-100');
         smoothnessScore = Math.max(0, smoothnessScore - dt * 9);
-        handleDynamicBeep(3);
-
-        if (dominantAction === 'PHANH') {
-          title.textContent = `🛑 PHANH GẤP (${pctPhanh}%)`;
-          sub.textContent = 'Vượt ngưỡng! Nới nhẹ chân phanh';
-        } else if (dominantAction === 'CUA') {
-          title.textContent = `🔄 VÀO CUA GẮT (${pctCua}%)`;
-          sub.textContent = 'Vượt ngưỡng! Giảm tốc & trả lái mượt';
-        } else {
-          title.textContent = `🚀 THỐC GA MẠNH (${pctGa}%)`;
-          sub.textContent = 'Vượt ngưỡng! Nhả nhẹ chân ga';
-        }
-      }
-      // Cấp độ 2: Chạm ngưỡng Mức 2 (Mặc định 80% - Bíp nhanh)
-      else if (maxPct >= config.beepLvl2) {
+        handleLinearBeep(maxPct);
+        title.textContent = `🛑 VƯỢT NGƯỠNG (${maxPct}%)`;
+        sub.textContent = 'Thao tác quá gắt, cần giảm cường độ!';
+      } else if (maxPct >= config.startBeep) {
         banner.classList.add('warn-80');
-        smoothnessScore = Math.max(0, smoothnessScore - dt * 3.5);
-        handleDynamicBeep(2);
-
-        if (dominantAction === 'PHANH') {
-          title.textContent = `⚠️ RÀ PHANH ÊM (${pctPhanh}%)`;
-          sub.textContent = `Đã vượt ${config.beepLvl2}% ngưỡng phanh`;
-        } else if (dominantAction === 'CUA') {
-          title.textContent = `⚠️ ÔM CUA ÊM (${pctCua}%)`;
-          sub.textContent = `Đã vượt ${config.beepLvl2}% ngưỡng vào cua`;
-        } else {
-          title.textContent = `⚠️ ĐỀU CHÂN GA (${pctGa}%)`;
-          sub.textContent = `Đã vượt ${config.beepLvl2}% ngưỡng tăng tốc`;
-        }
-      }
-      // Cấp độ 1: Chạm ngưỡng Mức 1 (Mặc định 70% - Bíp rời rạc)
-      else if (maxPct >= config.beepLvl1) {
-        banner.classList.add('warn-70');
-        smoothnessScore = Math.max(0, smoothnessScore - dt * 1.0);
-        handleDynamicBeep(1);
-
-        if (dominantAction === 'PHANH') {
-          title.textContent = `CHỚM MỨC PHANH (${pctPhanh}%)`;
-          sub.textContent = 'Giữ nguyên hoặc nới nhẹ chân phanh';
-        } else if (dominantAction === 'CUA') {
-          title.textContent = `CHỚM MỨC CUA (${pctCua}%)`;
-          sub.textContent = 'Giữ đều góc vô lăng';
-        } else {
-          title.textContent = `CHỚM MỨC GA (${pctGa}%)`;
-          sub.textContent = 'Giữ đều chân ga hiện tại';
-        }
+        smoothnessScore = Math.max(0, smoothnessScore - dt * 3);
+        handleLinearBeep(maxPct);
+        title.textContent = `⚠️ ĐANG TIẾN SÁT GIỚI HẠN (${maxPct}%)`;
+        sub.textContent = 'Nới nhẹ chân ga/phanh để giữ êm ái';
+      } else {
+        handleLinearBeep(0); // Dừng bíp
+        banner.className = 'alert-banner';
+        title.textContent = 'LÁI XE ÊM ÁI';
+        sub.textContent = 'Người ngồi sau rất thoải mái';
+        smoothnessScore = Math.min(100, smoothnessScore + dt * 1.4);
       }
       // Lái xe êm ái (< Mức 1)
       else {
@@ -1463,10 +1387,23 @@
     document.getElementById('btnChartBar').addEventListener('click', () => applyChartType('bar'));
     document.getElementById('btnChartDonut').addEventListener('click', () => applyChartType('donut'));
 
-    // Nghe thử 3 cấp độ Bíp
-    document.getElementById('btnTestBeep1').addEventListener('click', () => playPreviewBeepPattern(1));
-    document.getElementById('btnTestBeep2').addEventListener('click', () => playPreviewBeepPattern(2));
-    document.getElementById('btnTestBeep3').addEventListener('click', () => playPreviewBeepPattern(3));
+    
+    // Nút nghe thử âm thanh tuyến tính
+    document.getElementById('btnTestBeepLow').addEventListener('click', () => {
+      initAudioContext();
+      emitSingleBeep(600, 80, 'sine', 0.25); // Tiếng bíp thưa, trầm
+    });
+
+    document.getElementById('btnTestBeepHigh').addEventListener('click', () => {
+      initAudioContext();
+      // Giả lập chuỗi bíp dồn dập khi gần 100%
+      for (let i = 0; i < 4; i++) {
+        setTimeout(() => emitSingleBeep(1020, 75, 'triangle', 0.3), i * 140);
+      }
+    });
+
+    // Ràng buộc thanh trượt Mức bắt đầu bíp
+    bindSlider('rngStartBeep', 'lblStartBeep', 'startBeep', '%', 0);
 
     function bindSlider(sliderId, labelId, cfgKey, unit, decimals = 2) {
       const slider = document.getElementById(sliderId);

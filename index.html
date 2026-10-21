@@ -910,7 +910,16 @@
       saveConfig();
     }
 
+    // Tính các mốc màu từ "Mức bắt đầu phát tiếng bíp" (startBeep)
+    function syncBeepLevels() {
+      const start = Number(config.startBeep) || 70;
+      config.beepLvl1 = start;
+      config.beepLvl2 = Math.round((start + 100) / 2);
+      config.beepLvl3 = 100;
+    }
+
     function updateVisualThresholdMarkers() {
+      syncBeepLevels();
       // Đảm bảo Lvl1 < Lvl2 < Lvl3 hợp lý
       const r1 = Math.min(100, Math.round((config.beepLvl1 / config.beepLvl3) * 100));
       const r2 = Math.min(100, Math.round((config.beepLvl2 / config.beepLvl3) * 100));
@@ -1236,20 +1245,9 @@
       if (isParked) {
         title.textContent = 'XE ĐANG ĐỖ';
         sub.textContent = 'Tạm khóa tiếng bíp dưới 5 km/h';
-        handleDynamicBeep(0);
+        handleLinearBeep(0);
         return;
       }
-
-      // Xác định thao tác nào đang chiếm ưu thế
-      let dominantAction = 'GA';
-      if (pctPhanh >= pctGa && pctPhanh >= pctCua) dominantAction = 'PHANH';
-      else if (pctCua >= pctGa) dominantAction = 'CUA';
-
-      // Cấp độ 3: Lạng lách hoặc Vượt ngưỡng Mức 3 (Mặc định 100%)
-      const maxPct = Math.max(pctGa, pctPhanh, pctCua);
-      updateMetricDisplay('Ga', pctGa);
-      updateMetricDisplay('Phanh', pctPhanh);
-      updateMetricDisplay('Cua', pctCua);
 
       // Gọi tiếng bíp tuyến tính theo % lực G lớn nhất
       if (isWeaving) {
@@ -1273,13 +1271,6 @@
       } else {
         handleLinearBeep(0); // Dừng bíp
         banner.className = 'alert-banner';
-        title.textContent = 'LÁI XE ÊM ÁI';
-        sub.textContent = 'Người ngồi sau rất thoải mái';
-        smoothnessScore = Math.min(100, smoothnessScore + dt * 1.4);
-      }
-      // Lái xe êm ái (< Mức 1)
-      else {
-        handleDynamicBeep(0);
         title.textContent = 'LÁI XE ÊM ÁI';
         sub.textContent = 'Người ngồi sau rất thoải mái';
         smoothnessScore = Math.min(100, smoothnessScore + dt * 1.4);
@@ -1332,7 +1323,7 @@
         isRunning = false;
         window.removeEventListener('devicemotion', handleMotion);
         stopBackgroundGPS();
-        handleDynamicBeep(0);
+        handleLinearBeep(0);
         if (wakeLock) {
           wakeLock.release().catch(() => {});
           wakeLock = null;
@@ -1420,9 +1411,6 @@
       });
     }
 
-    bindSlider('rngBeepLvl1', 'lblBeepLvl1', 'beepLvl1', '%', 0);
-    bindSlider('rngBeepLvl2', 'lblBeepLvl2', 'beepLvl2', '%', 0);
-    bindSlider('rngBeepLvl3', 'lblBeepLvl3', 'beepLvl3', '%', 0);
     bindSlider('rngMaxGa', 'lblMaxGa', 'maxGa', 'G', 2);
     bindSlider('rngMaxPhanh', 'lblMaxPhanh', 'maxPhanh', 'G', 2);
     bindSlider('rngMaxCua', 'lblMaxCua', 'maxCua', 'G', 2);

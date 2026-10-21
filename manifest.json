@@ -3,10 +3,10 @@
   "short_name": "SmooDri",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0b1120",
-  "theme_color": "#0b1120",
+  "background_color": "#f1f5f9",
+  "theme_color": "#f1f5f9",
   "orientation": "portrait",
-  "description": "Ứng dụng hỗ trợ luyện tay lái êm trên đường đèo, cảnh báo bằng âm thanh MP3 Offline.",
+  "description": "Ứng dụng hỗ trợ luyện tay lái êm trên đường đèo, cảnh báo bằng tiếng bíp đa cấp Offline.",
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/1126/1126585.png",

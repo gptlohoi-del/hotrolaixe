@@ -237,7 +237,6 @@
       overflow: hidden;
     }
 
-    /* Vòng 80% */
     .cup-ring-80 {
       width: 80%;
       height: 80%;
@@ -247,7 +246,6 @@
       pointer-events: none;
     }
 
-    /* Vòng tâm êm ái 40% */
     .cup-ring-40 {
       width: 40%;
       height: 40%;
@@ -286,7 +284,7 @@
       font-family: monospace;
     }
 
-    /* 3 Thanh đo lực: Ga, Phanh, Vào cua */
+    /* 3 Thanh đo lực */
     .bars-container {
       display: flex;
       flex-direction: column;
@@ -310,11 +308,11 @@
     .bar-track {
       width: 100%;
       height: 16px;
-      background: var(--bar-bg); /* Thay màu cứng bằng biến --bar-bg */
+      background: var(--bar-bg);
       border-radius: 8px;
       position: relative;
       overflow: hidden;
-      border: 1px solid var(--bar-border); /* Thay màu cứng bằng biến --bar-border */
+      border: 1px solid var(--bar-border);
     }
 
     .bar-mark-80 {
@@ -479,7 +477,6 @@
 </head>
 <body>
   <div class="app-container">
-    <!-- HÀNG 1: TRẠNG THÁI ĐỘ DỐC & NÚT CHỨC NĂNG -->
     <!-- HÀNG 1: TRẠNG THÁI ĐỘ DỐC & NÚT CÀI ĐẶT -->
     <div class="top-bar">
       <div id="slopeBadge" class="slope-badge">
@@ -501,7 +498,7 @@
       </div>
       <div id="alertBanner" class="alert-banner">
         <div id="alertTitle" class="alert-title">SẴN SÀNG</div>
-        <div id="alertSub" class="alert-sub">Bấm Bắt đầu để kích hoạt cảm biến</div>
+        <div id="alertSub" class="alert-sub">Bấm Cân chỉnh & Bắt đầu</div>
       </div>
     </div>
 
@@ -557,8 +554,7 @@
       </div>
     </div>
 
-    <!-- HÀNG 4: NÚT BẮT ĐẦU & CHẾ ĐỘ THỬ NGHIỆM -->
-    <!-- HÀNG 4: NÚT BẮT ĐẦU KÊM CÂN CHỈNH & CHẾ ĐỘ THỬ -->
+    <!-- HÀNG 4: NÚT CÂN CHỈNH & BẮT ĐẦU -->
     <div class="bottom-bar">
       <button id="btnStart" class="btn-main">
         <span>🎯 CÂN CHỈNH & BẮT ĐẦU</span>
@@ -567,6 +563,7 @@
         Thử tại chỗ:<br><strong id="testModeState">ĐANG BẬT</strong>
       </button>
     </div>
+  </div> <!-- Đóng thẻ .app-container đúng vị trí -->
 
   <!-- POPUP CÀI ĐẶT -->
   <div id="settingsModal" class="modal-overlay">
@@ -617,24 +614,23 @@
       </div>
 
       <div class="setting-group">
-        <div class="setting-label"><span>Nghe thử 4 file MP3 (từ sounds.json):</span></div>
-        <div class="sound-test-grid">
-          <button class="btn-sound" data-sound="ga">🔊 Thử ga.mp3</button>
-          <button class="btn-sound" data-sound="phanh">🔊 Thử phanh.mp3</button>
-          <button class="btn-sound" data-sound="cua">🔊 Thử cua.mp3</button>
-          <button class="btn-sound" data-sound="lang_lach">🔊 Thử lang_lach.mp3</button>
-        </div>
-      </div>
-
-      <!-- THÊM MỤC CHỌN GIAO DIỆN Ở ĐÂY -->
-      <div class="setting-group">
         <div class="setting-label">
           <span>Chế độ giao diện</span>
           <span id="lblThemeName">Tối (Dark)</span>
         </div>
         <div class="sound-test-grid">
-          <button class="btn-sound" id="btnThemeDark" style="background: #0b1120; color: #fff;">🌙 Giao diện Tối</button>
-          <button class="btn-sound" id="btnThemeLight" style="background: #f8fafc; color: #0f172a; border: 1px solid #cbd5e1;">☀️ Giao diện Sáng</button>
+          <button class="btn-sound" id="btnThemeDark" style="background: #0b1120; color: #fff;">🌙 Tối</button>
+          <button class="btn-sound" id="btnThemeLight" style="background: #f8fafc; color: #0f172a; border: 1px solid #cbd5e1;">☀️ Sáng</button>
+        </div>
+      </div>
+
+      <div class="setting-group">
+        <div class="setting-label"><span>Nghe thử 4 file MP3 (từ sounds.json):</span></div>
+        <div class="sound-test-grid">
+          <button class="btn-sound" data-sound="ga">🔊 ga.mp3</button>
+          <button class="btn-sound" data-sound="phanh">🔊 phanh.mp3</button>
+          <button class="btn-sound" data-sound="cua">🔊 cua.mp3</button>
+          <button class="btn-sound" data-sound="lang_lach">🔊 lang_lach.mp3</button>
         </div>
       </div>
 
@@ -646,8 +642,6 @@
   </div>
 
   <script>
-
-
     /**************************************************************
      * 1. ĐĂNG KÝ SERVICE WORKER (NETWORK FIRST)
      **************************************************************/
@@ -666,7 +660,8 @@
       maxCua: 0.25,
       maxJerk: 0.35,
       cooldown: 3.0,
-      testMode: true
+      testMode: true,
+      theme: 'dark'
     };
 
     let config = { ...defaultConfig };
@@ -679,10 +674,22 @@
       localStorage.setItem('drive_smooth_cfg', JSON.stringify(config));
     }
 
+    // Áp dụng giao diện Sáng / Tối
+    function applyTheme(themeName) {
+      if (themeName === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+        document.getElementById('lblThemeName').textContent = 'Sáng (Light)';
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        document.getElementById('lblThemeName').textContent = 'Tối (Dark)';
+      }
+      config.theme = themeName;
+      saveConfig();
+    }
+    applyTheme(config.theme);
+
     /**************************************************************
      * 3. HỆ THỐNG ÂM THANH MP3 OFFLINE (NẠP RAM QUA WEB AUDIO API)
-     * - Không dùng luồng âm thanh nền liên tục để tránh xung đột với app khác
-     * - Giải mã sẵn 4 file MP3 từ sounds.json vào RAM để phát Offline 0ms
      **************************************************************/
     let audioCtx = null;
     const audioBuffers = {};
@@ -715,9 +722,7 @@
             soundUrls = { ...soundUrls, ...data.files };
           }
         }
-      } catch (e) {
-        // Nếu offline hoàn toàn, dùng cache hoặc đường dẫn mặc định
-      }
+      } catch (e) {}
 
       let loadedCount = 0;
       const keys = Object.keys(soundUrls);
@@ -730,21 +735,18 @@
             audioBuffers[key] = await audioCtx.decodeAudioData(arrayBuffer);
             loadedCount++;
           }
-        } catch (err) {
-          // File MP3 chưa được người dùng upload hoặc lỗi giải mã
-        }
+        } catch (err) {}
       }
 
       if (loadedCount === keys.length) {
         statusEl.textContent = `Đã nạp đủ ${loadedCount}/${keys.length} file MP3 vào bộ nhớ Offline.`;
-        statusEl.style.color = '#10b981';
+        statusEl.style.color = 'var(--green)';
       } else {
-        statusEl.textContent = `Đã nạp ${loadedCount}/${keys.length} file MP3 (Tự động phát tiếng Bíp cho file còn thiếu).`;
-        statusEl.style.color = '#f59e0b';
+        statusEl.textContent = `Đã nạp ${loadedCount}/${keys.length} file MP3 (Dùng tiếng bíp cho file thiếu).`;
+        statusEl.style.color = 'var(--yellow)';
       }
     }
 
-    // Phát âm thanh MP3 từ RAM (Nếu thiếu file MP3 thì phát tiếng bíp ngắn dự phòng)
     function playAlertSound(type, forcePlay = false) {
       const now = performance.now();
       if (!forcePlay && now - lastSpokenTime < config.cooldown * 1000) {
@@ -760,7 +762,6 @@
         source.connect(audioCtx.destination);
         source.start(0);
       } else {
-        // Tiếng bíp dự phòng khi chưa chép file MP3 vào thư mục
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = type === 'lang_lach' ? 'sawtooth' : 'sine';
@@ -775,31 +776,26 @@
     }
 
     /**************************************************************
-     * 4. THUẬT TOÁN CẢM BIẾN, TỰ PHÁT HIỆN ĐÈO DỐC & LẠNG LÁCH
+     * 4. THUẬT TOÁN CẢM BIẾN & ĐÈO DỐC
      **************************************************************/
     let isRunning = false;
     let smoothnessScore = 100;
     let wakeLock = null;
     let gpsWatchId = null;
 
-    // Trạng thái GPS chạy ngầm (không hiển thị tốc độ)
     let currentSpeedKmh = 0;
     let hasGpsFix = false;
     let lastAltitude = null;
     let altitudeDelta = 0;
 
-    // Cân chỉnh thủ công & Tự động bù nghiêng mặt đường (Đường đèo)
     let manualOffset = { x: 0, y: 0 };
     let rawSensor = { x: 0, y: 0, z: 0 };
 
-    // Bộ lọc thông thấp (Low-pass filter) để tách trọng lực dốc đèo (4-5 giây)
-    // và bộ lọc mượt chuyển động ngắn hạn
     let slopeBaseline = { x: 0, y: 0 };
     let smoothG = { x: 0, y: 0 };
     let prevLateralG = 0;
     let prevTimestamp = performance.now();
 
-    // Bộ đếm lạng lách (đổi dấu gia tốc ngang liên tục)
     let reversalTimestamps = [];
     let lastSignX = 0;
 
@@ -808,11 +804,9 @@
       gpsWatchId = navigator.geolocation.watchPosition(
         (pos) => {
           hasGpsFix = true;
-          // Vận tốc m/s đổi sang km/h
           if (pos.coords.speed !== null && !isNaN(pos.coords.speed)) {
             currentSpeedKmh = pos.coords.speed * 3.6;
           }
-          // Theo dõi độ cao vệ tinh hỗ trợ xác nhận đường đèo
           if (pos.coords.altitude !== null && !isNaN(pos.coords.altitude)) {
             if (lastAltitude !== null) {
               altitudeDelta = Math.abs(pos.coords.altitude - lastAltitude);
@@ -820,14 +814,8 @@
             lastAltitude = pos.coords.altitude;
           }
         },
-        () => {
-          hasGpsFix = false;
-        },
-        {
-          enableHighAccuracy: true, // Ép dùng chip GPS vệ tinh phần cứng (chạy Offline)
-          maximumAge: 2000,
-          timeout: 10000
-        }
+        () => { hasGpsFix = false; },
+        { enableHighAccuracy: true, maximumAge: 2000, timeout: 10000 }
       );
     }
 
@@ -838,12 +826,9 @@
       }
     }
 
-    // Giữ màn hình luôn sáng khi mở ứng dụng
     async function requestWakeLock() {
       if ('wakeLock' in navigator) {
-        try {
-          wakeLock = await navigator.wakeLock.request('screen');
-        } catch (e) {}
+        try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
       }
     }
 
@@ -861,10 +846,9 @@
       prevTimestamp = now;
 
       const ag = event.accelerationIncludingGravity;
-      const lin = event.acceleration; // Gia tốc đã lọc trọng lực từ con quay hồi chuyển (nếu có)
+      const lin = event.acceleration;
       if (!ag) return;
 
-      // Quy đổi từ m/s² sang đơn vị G (1G = 9.80665 m/s²)
       const gxRaw = (ag.x || 0) / 9.80665;
       const gyRaw = (ag.y || 0) / 9.80665;
       const gzRaw = (ag.z || 0) / 9.80665;
@@ -873,28 +857,22 @@
       rawSensor.y = gyRaw;
       rawSensor.z = gzRaw;
 
-      // Trừ góc đặt điện thoại ban đầu
       const xCal = gxRaw - manualOffset.x;
       const yCal = gyRaw - manualOffset.y;
 
-      // 1. TỰ ĐỘNG PHÁT HIỆN ĐỘ NGHIÊNG ĐƯỜNG ĐÈO & BÙ DỐC
-      // Trọng lực thay đổi rất chậm khi lên/xuống dốc kéo dài (hệ số hội tụ ~4 giây)
       const slopeAlpha = Math.min(dt / 4.0, 0.05);
       slopeBaseline.x += (xCal - slopeBaseline.x) * slopeAlpha;
       slopeBaseline.y += (yCal - slopeBaseline.y) * slopeAlpha;
 
-      // Tính góc dốc mặt đường (độ) từ thành phần trọng lực kéo dài
       const pitchRad = Math.atan2(slopeBaseline.y, Math.sqrt(gxRaw * gxRaw + gzRaw * gzRaw) || 1);
       const slopeDeg = Math.round(Math.abs(pitchRad * (180 / Math.PI)));
       const isMountainPass = slopeDeg >= 3 || altitudeDelta > 1.5;
 
       updateSlopeBadge(slopeDeg, isMountainPass);
 
-      // 2. TÍNH LỰC G THỰC TẾ TÁC ĐỘNG LÊN NGƯỜI NGỒI SAU (Đã bù dốc đèo)
       let dynamicX = xCal - slopeBaseline.x;
       let dynamicY = yCal - slopeBaseline.y;
 
-      // Nếu máy có cảm biến Gyroscope hỗ trợ event.acceleration chuẩn thì pha trộn để nhạy hơn
       if (lin && lin.x !== null && lin.y !== null) {
         const linX = lin.x / 9.80665;
         const linY = lin.y / 9.80665;
@@ -902,16 +880,13 @@
         dynamicY = dynamicY * 0.5 + linY * 0.5;
       }
 
-      // Làm mượt chống nhiễu rung mặt đường nhựa
       const smoothAlpha = 0.22;
       smoothG.x += (dynamicX - smoothG.x) * smoothAlpha;
       smoothG.y += (dynamicY - smoothG.y) * smoothAlpha;
 
-      // 3. PHÁT HIỆN LẠNG LÁCH / GIẬT VÔ LĂNG (Lateral Jerk & Đổi hướng liên tục)
       const lateralJerk = Math.abs(smoothG.x - prevLateralG) / dt;
       prevLateralG = smoothG.x;
 
-      // Đếm số lần đổi chiều lực ngang đáng kể trong cửa sổ 3 giây
       if (Math.abs(smoothG.x) > config.maxCua * 0.45) {
         const currentSign = Math.sign(smoothG.x);
         if (lastSignX !== 0 && currentSign !== lastSignX) {
@@ -925,7 +900,6 @@
         reversalTimestamps.length >= 2 ||
         (lateralJerk > config.maxJerk && Math.abs(smoothG.x) > config.maxCua * 0.65);
 
-      // 4. CẬP NHẬT GIAO DIỆN & KIỂM TRA NGƯỠNG 80% / 100%
       evaluateAndRender(smoothG.x, smoothG.y, isWeaving, dt);
     }
 
@@ -942,35 +916,28 @@
     }
 
     function evaluateAndRender(gx, gy, isWeaving, dt) {
-      // Tách Tăng tốc (gy dương) và Phanh (gy âm)
       const accelG = Math.max(0, gy);
       const brakeG = Math.max(0, -gy);
       const cornerG = Math.abs(gx);
       const totalG = Math.hypot(gx, gy);
 
-      // Tính phần trăm so với ngưỡng 100% đã cài
       const pctGa = Math.min(120, Math.round((accelG / config.maxGa) * 100));
       const pctPhanh = Math.min(120, Math.round((brakeG / config.maxPhanh) * 100));
       const pctCua = Math.min(120, Math.round((cornerG / config.maxCua) * 100));
 
-      // Cập nhật 3 thanh tiến trình
       updateBar('barGa', 'valGa', pctGa);
       updateBar('barPhanh', 'valPhanh', pctPhanh);
       updateBar('barCua', 'valCua', pctCua);
 
-      // Cập nhật vị trí giọt nước trong Cốc nước
       const maxRef = Math.max(config.maxGa, config.maxPhanh, config.maxCua);
       const normX = Math.max(-1, Math.min(1, gx / maxRef));
       const normY = Math.max(-1, Math.min(1, gy / maxRef));
-      const radiusPx = 68; // Bán kính dịch chuyển tối đa trên màn hình
+      const radiusPx = 68;
       const ball = document.getElementById('gBall');
       ball.style.transform = `translate(${normX * radiusPx}px, ${-normY * radiusPx}px)`;
       document.getElementById('cupReadout').textContent = `${totalG.toFixed(2)} G`;
 
-      // Kiểm tra điều kiện khóa cảnh báo khi xe đang đỗ (dưới 5 km/h)
-      // Nếu bật "Thử tại chỗ" hoặc mất sóng GPS trong khe núi thì vẫn cho phép cảnh báo
       const isParked = !config.testMode && hasGpsFix && currentSpeedKmh < 5;
-
       const banner = document.getElementById('alertBanner');
       const title = document.getElementById('alertTitle');
       const sub = document.getElementById('alertSub');
@@ -983,7 +950,6 @@
         return;
       }
 
-      // Ưu tiên 1: Cảnh báo Lạng lách / Giật vô lăng
       if (isWeaving) {
         banner.classList.add('warn-100');
         title.textContent = '⚠️ LẠNG LÁCH / GIẬT LÁI!';
@@ -992,9 +958,7 @@
         ball.style.boxShadow = '0 0 14px var(--red)';
         smoothnessScore = Math.max(0, smoothnessScore - dt * 12);
         playAlertSound('lang_lach');
-      }
-      // Ưu tiên 2: Vượt ngưỡng 100%
-      else if (pctPhanh >= 100 || pctGa >= 100 || pctCua >= 100) {
+      } else if (pctPhanh >= 100 || pctGa >= 100 || pctCua >= 100) {
         banner.classList.add('warn-100');
         ball.style.background = 'var(--red)';
         ball.style.boxShadow = '0 0 14px var(--red)';
@@ -1013,9 +977,7 @@
           sub.textContent = 'Nhả nhẹ chân ga';
           playAlertSound('ga');
         }
-      }
-      // Ưu tiên 3: Chạm ngưỡng 80% (Nhắc sớm để giảm cường độ)
-      else if (pctPhanh >= 80 || pctGa >= 80 || pctCua >= 80) {
+      } else if (pctPhanh >= 80 || pctGa >= 80 || pctCua >= 80) {
         banner.classList.add('warn-80');
         ball.style.background = 'var(--yellow)';
         ball.style.boxShadow = '0 0 12px var(--yellow)';
@@ -1034,18 +996,14 @@
           sub.textContent = 'Chạm 80% ngưỡng tăng tốc';
           playAlertSound('ga');
         }
-      }
-      // Lái xe êm ái (Dưới 80%)
-      else {
+      } else {
         ball.style.background = 'var(--green)';
         ball.style.boxShadow = '0 0 12px var(--green)';
         title.textContent = 'LÁI XE ÊM ÁI';
         sub.textContent = 'Người ngồi sau rất thoải mái';
-        // Hồi phục điểm từ từ khi chạy êm
         smoothnessScore = Math.min(100, smoothnessScore + dt * 1.2);
       }
 
-      // Hiển thị điểm
       const scoreEl = document.getElementById('scoreValue');
       const roundedScore = Math.round(smoothnessScore);
       scoreEl.textContent = roundedScore;
@@ -1070,85 +1028,64 @@
     }
 
     /**************************************************************
-     * 5. SỰ KIỆN NÚT BẤM & KHỞI ĐỘNG
+     * 5. SỰ KIỆN NÚT BẤM & KHỞI ĐỘNG (GỘP CÂN CHỈNH & BẮT ĐẦU)
      **************************************************************/
     const btnStart = document.getElementById('btnStart');
-    // const btnCalibrate = document.getElementById('btnCalibrate');
     const btnTestMode = document.getElementById('btnTestMode');
 
-    const btnStart = document.getElementById('btnStart');
-const btnTestMode = document.getElementById('btnTestMode');
+    btnStart.addEventListener('click', async () => {
+      initAudioContext();
+      await loadSoundsFromConfig();
 
-btnStart.addEventListener('click', async () => {
-  initAudioContext();
-  await loadSoundsFromConfig();
-
-  if (!isRunning) {
-    // Xin quyền cảm biến trên iOS 13+
-    if (
-      typeof DeviceMotionEvent !== 'undefined' &&
-      typeof DeviceMotionEvent.requestPermission === 'function'
-    ) {
-      try {
-        const state = await DeviceMotionEvent.requestPermission();
-        if (state !== 'granted') {
-          alert('Bạn cần cấp quyền Cảm biến chuyển động để đo lực G!');
-          return;
+      if (!isRunning) {
+        if (
+          typeof DeviceMotionEvent !== 'undefined' &&
+          typeof DeviceMotionEvent.requestPermission === 'function'
+        ) {
+          try {
+            const state = await DeviceMotionEvent.requestPermission();
+            if (state !== 'granted') {
+              alert('Bạn cần cấp quyền Cảm biến chuyển động để đo lực G!');
+              return;
+            }
+          } catch (e) {}
         }
-      } catch (e) {}
-    }
 
-    // === TỰ ĐỘNG CÂN CHỈNH NGAY LẬP TỨC TRƯỚC KHI BẮT ĐẦU ===
-    manualOffset.x = rawSensor.x;
-    manualOffset.y = rawSensor.y;
-    slopeBaseline.x = 0;
-    slopeBaseline.y = 0;
-    smoothG.x = 0;
-    smoothG.y = 0;
+        // Tự động cân chỉnh ngay khi bấm bắt đầu
+        manualOffset.x = rawSensor.x;
+        manualOffset.y = rawSensor.y;
+        slopeBaseline.x = 0;
+        slopeBaseline.y = 0;
+        smoothG.x = 0;
+        smoothG.y = 0;
 
-    // Kích hoạt chạy cảm biến & GPS ngầm
-    isRunning = true;
-    prevTimestamp = performance.now();
-    window.addEventListener('devicemotion', handleMotion);
-    startBackgroundGPS();
-    requestWakeLock();
+        isRunning = true;
+        prevTimestamp = performance.now();
+        window.addEventListener('devicemotion', handleMotion);
+        startBackgroundGPS();
+        requestWakeLock();
 
-    // Đổi giao diện nút thành Dừng
-    btnStart.classList.add('running');
-    btnStart.innerHTML = '<span>⏹ DỪNG LẠI</span>';
-    document.getElementById('alertTitle').textContent = 'ĐANG THEO DÕI';
-    document.getElementById('alertSub').textContent = 'Đã cân chỉnh 0G - Xe bắt đầu lăn bánh';
-  } else {
-    // Dừng lại
-    isRunning = false;
-    window.removeEventListener('devicemotion', handleMotion);
-    stopBackgroundGPS();
-    if (wakeLock) {
-      wakeLock.release().catch(() => {});
-      wakeLock = null;
-    }
+        btnStart.classList.add('running');
+        btnStart.innerHTML = '<span>⏹ DỪNG LẠI</span>';
+        document.getElementById('alertTitle').textContent = 'ĐANG THEO DÕI';
+        document.getElementById('alertSub').textContent = 'Đã cân chỉnh 0G - Xe bắt đầu lăn bánh';
+      } else {
+        isRunning = false;
+        window.removeEventListener('devicemotion', handleMotion);
+        stopBackgroundGPS();
+        if (wakeLock) {
+          wakeLock.release().catch(() => {});
+          wakeLock = null;
+        }
 
-    btnStart.classList.remove('running');
-    btnStart.innerHTML = '<span>🎯 CÂN CHỈNH & BẮT ĐẦU</span>';
-    document.getElementById('alertBanner').className = 'alert-banner';
-    document.getElementById('alertTitle').textContent = 'ĐÃ TẠM DỪNG';
-    document.getElementById('alertSub').textContent = 'Bấm nút dưới để cân chỉnh & chạy lại';
-  }
-});
+        btnStart.classList.remove('running');
+        btnStart.innerHTML = '<span>🎯 CÂN CHỈNH & BẮT ĐẦU</span>';
+        document.getElementById('alertBanner').className = 'alert-banner';
+        document.getElementById('alertTitle').textContent = 'ĐÃ TẠM DỪNG';
+        document.getElementById('alertSub').textContent = 'Bấm nút dưới để cân chỉnh & chạy lại';
+      }
+    });
 
-    // Nút Cân chỉnh 0G tức thì
-    // btnCalibrate.addEventListener('click', () => {
-    //   manualOffset.x = rawSensor.x;
-    //   manualOffset.y = rawSensor.y;
-    //   slopeBaseline.x = 0;
-    //   slopeBaseline.y = 0;
-    //   smoothG.x = 0;
-    //   smoothG.y = 0;
-    //   document.getElementById('alertTitle').textContent = 'ĐÃ CÂN CHỈNH TÂM 0G';
-    //   document.getElementById('alertSub').textContent = 'Đã lấy góc đặt máy hiện tại làm chuẩn';
-    // });
-
-    // Nút bật/tắt chế độ thử tại chỗ
     function renderTestModeButton() {
       const stateEl = document.getElementById('testModeState');
       if (config.testMode) {
@@ -1167,7 +1104,7 @@ btnStart.addEventListener('click', async () => {
     });
 
     /**************************************************************
-     * 6. XỬ LÝ POPUP CÀI ĐẶT & CẬP NHẬT ÂM THANH
+     * 6. XỬ LÝ POPUP CÀI ĐẶT & GIAO DIỆN SÁNG/TỐI
      **************************************************************/
     const modal = document.getElementById('settingsModal');
     document.getElementById('btnSettings').addEventListener('click', () => {
@@ -1177,6 +1114,15 @@ btnStart.addEventListener('click', async () => {
     });
     document.getElementById('btnCloseModal').addEventListener('click', () => {
       modal.classList.remove('open');
+    });
+
+    // Nút chuyển đổi giao diện trong cài đặt
+    document.getElementById('btnThemeDark').addEventListener('click', () => {
+      applyTheme('dark');
+    });
+
+    document.getElementById('btnThemeLight').addEventListener('click', () => {
+      applyTheme('light');
     });
 
     function bindSlider(sliderId, labelId, cfgKey, unit) {
@@ -1200,7 +1146,6 @@ btnStart.addEventListener('click', async () => {
     bindSlider('rngCooldown', 'lblCooldown', 'cooldown', 'giây');
     renderTestModeButton();
 
-    // Nút nghe thử 4 file MP3
     document.querySelectorAll('.btn-sound').forEach((btn) => {
       btn.addEventListener('click', () => {
         const soundKey = btn.getAttribute('data-sound');
@@ -1208,52 +1153,16 @@ btnStart.addEventListener('click', async () => {
       });
     });
 
-    // Nút ép tải lại sounds.json & MP3 mới từ GitHub
     document.getElementById('btnReloadSounds').addEventListener('click', async () => {
       const statusEl = document.getElementById('audioStatusText');
       statusEl.textContent = 'Đang tải lại sounds.json và MP3 từ GitHub...';
-      statusEl.style.color = '#38bdf8';
+      statusEl.style.color = 'var(--blue)';
 
       if (navigator.serviceWorker && navigator.serviceWorker.controller) {
         navigator.serviceWorker.controller.postMessage({ action: 'UPDATE_SOUNDS' });
       }
       await loadSoundsFromConfig();
     });
-
-
-    const defaultConfig = {
-      maxGa: 0.25,
-      maxPhanh: 0.28,
-      maxCua: 0.25,
-      maxJerk: 0.35,
-      cooldown: 3.0,
-      testMode: true,
-      theme: 'dark' // Thêm dòng này
-    };
-
-    function applyTheme(themeName) {
-      if (themeName === 'light') {
-        document.documentElement.setAttribute('data-theme', 'light');
-        document.getElementById('lblThemeName').textContent = 'Sáng (Light)';
-      } else {
-        document.documentElement.removeAttribute('data-theme');
-        document.getElementById('lblThemeName').textContent = 'Tối (Dark)';
-      }
-      config.theme = themeName;
-      saveConfig();
-    }
-
-    // Gọi hàm này ngay khi tải trang để giữ đúng giao diện người dùng đã chọn
-    applyTheme(config.theme);
-
-    document.getElementById('btnThemeDark').addEventListener('click', () => {
-      applyTheme('dark');
-    });
-
-    document.getElementById('btnThemeLight').addEventListener('click', () => {
-      applyTheme('light');
-    });
-
   </script>
 </body>
 </html>

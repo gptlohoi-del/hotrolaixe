@@ -1077,9 +1077,11 @@
 
       if (now - lastBeepTime >= intervalMs) {
         lastBeepTime = now;
-        emitSingleBeep(freq, 75, wave, 0.28);
+        emitSingleBeep(freq, 65, wave, 0.28);
+        if (maxPct < 100) {
+          setTimeout(() => emitSingleBeep(freq, 65, wave, 0.28), 110);
+        }
       }
-    }
 
     // Âm sắc riêng biệt cho lỗi Lạng lách / Giật lái (Âm kép Cao-Thấp luân phiên)
     function handleWeavingBeep() {
@@ -1564,6 +1566,7 @@
     document.getElementById('btnTestBeepLow').addEventListener('click', () => {
       initAudioContext();
       emitSingleBeep(600, 80, 'sine', 0.25);
+      setTimeout(() => emitSingleBeep(600, 80, 'sine', 0.25), 150); // Tiếng bíp thứ 2 sau 0.15 giây
     });
 
     document.getElementById('btnTestBeepHigh').addEventListener('click', () => {

@@ -142,10 +142,10 @@
       transform: scale(0.95);
     }
 
-    /* HÀNG 2: ĐIỂM ÊM ÁI & HỘP CẢNH BÁO TRỰC QUAN */
+    /* HÀNG 2: ĐIỂM ÊM ÁI (+ SỐ LẦN VƯỢT NGƯỠNG) & HỘP CẢNH BÁO */
     .status-row {
       display: grid;
-      grid-template-columns: 106px 1fr;
+      grid-template-columns: 118px 1fr;
       gap: 8px;
       height: 74px;
       flex-shrink: 0;
@@ -160,6 +160,7 @@
       align-items: center;
       justify-content: center;
       padding: 6px;
+      position: relative;
     }
 
     .score-label {
@@ -170,11 +171,33 @@
       letter-spacing: 0.5px;
     }
 
+    .score-main-wrap {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 1px;
+    }
+
     .score-value {
-      font-size: 34px;
+      font-size: 32px;
       font-weight: 900;
       color: var(--green);
       line-height: 1.1;
+    }
+
+    /* Huy hiệu chỉ hiện số lần vượt ngưỡng vừa đủ nhìn bên cạnh điểm */
+    .violation-badge {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--red);
+      background: rgba(239, 68, 68, 0.14);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      padding: 1px 6px;
+      border-radius: 999px;
+      line-height: 1.2;
+      min-width: 22px;
+      text-align: center;
     }
 
     .alert-banner {
@@ -318,7 +341,7 @@
       z-index: 2;
     }
 
-    /* Hiển thị 0.00 G to, đậm, nằm gọn trong đáy Cốc nước để không đè viền */
+    /* Hiển thị 0.00 G to, đậm, nằm gọn trong đáy Cốc nước */
     .cup-readout {
       position: absolute;
       bottom: 8px;
@@ -484,10 +507,10 @@
       text-align: center;
     }
 
-    /* HÀNG 4: NÚT BẮT ĐẦU & CHẾ ĐỘ THỬ */
+    /* HÀNG 4: NÚT BẮT ĐẦU + NÚT ĐỘ NHẠY + NÚT KIỂU ÂM BÁO CÙNG HÀNG */
     .bottom-bar {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       height: 54px;
       flex-shrink: 0;
     }
@@ -496,7 +519,7 @@
       flex: 1;
       border: none;
       border-radius: 14px;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 800;
       color: #fff;
       background: linear-gradient(135deg, #10b981, #059669);
@@ -504,7 +527,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
+      padding: 0 8px;
       box-shadow: 0 4px 12px rgba(16, 185, 129, 0.28);
     }
 
@@ -513,24 +537,35 @@
       box-shadow: 0 4px 12px rgba(239, 68, 68, 0.28);
     }
 
-    .btn-test-mode {
-      width: 104px;
+    .btn-quick-action {
+      width: 84px;
       background: var(--card);
-      border: 1px solid var(--border);
+      border: 1.5px solid var(--border);
       border-radius: 14px;
       color: var(--subtext);
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
-      padding: 4px 6px;
+      padding: 4px 4px;
       cursor: pointer;
       text-align: center;
       line-height: 1.25;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
     }
 
-    .btn-test-mode.active {
-      border-color: var(--yellow);
-      color: var(--yellow);
-      background: rgba(245, 158, 11, 0.12);
+    .btn-quick-action strong {
+      font-size: 12.5px;
+      color: var(--blue);
+      font-weight: 900;
+      margin-top: 1px;
+    }
+
+    .btn-quick-action:active,
+    .btn-main:active {
+      transform: scale(0.96);
     }
 
     /* MODAL CÀI ĐẶT (POPUP) */
@@ -557,7 +592,7 @@
       max-width: 420px;
       max-height: 90dvh;
       overflow-y: auto;
-      padding: 15px;
+      padding: 0 15px 15px 15px; /* Giữ padding trái, phải, đáy, cho phía trên bằng 0 */
       display: flex;
       flex-direction: column;
       gap: 12px;
@@ -569,7 +604,11 @@
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid var(--border);
-      padding-bottom: 8px;
+      padding: 12px 0 8px 0; /* Thêm khoảng cách đệm phía trên cho cân đối */
+      position: sticky;      /* Cố định vị trí */
+      top: 0;                /* Dính sát mép trên cùng của khung modal */
+      background: var(--card); /* Đặt màu nền để khi cuộn nội dung bên dưới không bị lọt qua */
+      z-index: 10;           /* Đảm bảo luôn nằm nổi lên trên các thành phần khác */
     }
 
     .section-divider {
@@ -584,7 +623,7 @@
     .setting-group {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 5px;
     }
 
     .setting-label {
@@ -612,11 +651,18 @@
       gap: 6px;
     }
 
+    /* Lưới nút bấm Độ nhạy tự co giãn theo số lượng nút bạn cài trong mảng JS */
+    .preset-scale-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
+      gap: 6px;
+    }
+
     .btn-option {
       background: var(--btn-bg);
       border: 1.5px solid var(--border);
       color: var(--text);
-      padding: 9px 6px;
+      padding: 8px 6px;
       border-radius: 10px;
       font-size: 12px;
       font-weight: 700;
@@ -679,11 +725,14 @@
       </div>
     </div>
 
-    <!-- HÀNG 2: ĐIỂM SỐ & BẢNG CẢNH BÁO -->
+    <!-- HÀNG 2: ĐIỂM SỐ (+ SỐ LẦN VƯỢT NGƯỠNG) & BẢNG CẢNH BÁO -->
     <div class="status-row">
       <div class="score-card">
         <span class="score-label">ĐIỂM ÊM ÁI</span>
-        <span id="scoreValue" class="score-value">100</span>
+        <div class="score-main-wrap">
+          <span id="scoreValue" class="score-value">100</span>
+          <span id="violationCount" class="violation-badge" title="Số lần vượt ngưỡng 100% hoặc lạng lách">0</span>
+        </div>
       </div>
       <div id="alertBanner" class="alert-banner">
         <div id="alertTitle" class="alert-title">SẴN SÀNG</div>
@@ -783,13 +832,18 @@
       </div>
     </div>
 
-    <!-- HÀNG 4: NÚT CÂN CHỈNH & BẮT ĐẦU -->
+    <!-- HÀNG 4: NÚT CÂN CHỈNH & BẮT ĐẦU + NÚT ĐỘ NHẠY + NÚT KIỂU ÂM BÁO -->
     <div class="bottom-bar">
       <button id="btnStart" class="btn-main">
         <span>🎯 CÂN CHỈNH & BẮT ĐẦU</span>
       </button>
-      <button id="btnTestMode" class="btn-test-mode active">
-        Thử tại chỗ:<br><strong id="testModeState">ĐANG BẬT</strong>
+      <button id="btnMainScale" class="btn-quick-action" title="Đổi nhanh đồng loạt 4 ngưỡng cảm biến">
+        <span>ĐỘ NHẠY</span>
+        <strong id="mainScaleLabel">100%</strong>
+      </button>
+      <button id="btnMainWave" class="btn-quick-action" title="Đổi nhanh kiểu sóng âm báo">
+        <span>KIỂU ÂM BÁO</span>
+        <strong id="mainWaveLabel">SQUARE</strong>
       </button>
     </div>
   </div>
@@ -827,8 +881,28 @@
         </div>
       </div>
 
-      <!-- 2. CÀI ĐẶT TIẾNG BÍP & THỜI GIAN GIỮ THÔNG SỐ -->
-      <div class="section-divider">2. Âm thanh, Điểm số & Thời gian giữ</div>
+      <!-- 2. CÀI ĐẶT ÂM THANH SIÊU TO & THỜI GIAN GIỮ -->
+      <div class="section-divider">2. Chọn Kiểu Cảnh Báo & Thời gian giữ</div>
+
+      <div class="setting-group">
+        <div class="setting-label">
+          <span>Chọn kiểu cảnh báo (Sóng âm)</span>
+          <span id="lblWaveType">Square (Siêu to)</span>
+        </div>
+        <div class="option-grid-3">
+          <button class="btn-option" id="btnWaveSquare" data-wave="square">📢 Square</button>
+          <button class="btn-option" id="btnWaveTriangle" data-wave="triangle">🔔 Triangle</button>
+          <button class="btn-option" id="btnWaveSine" data-wave="sine">🔉 Sine</button>
+        </div>
+      </div>
+
+      <div class="setting-group">
+        <div class="setting-label">
+          <span>Khuếch đại âm lượng (Gain Boost)</span>
+          <span id="lblVolumeBoost">3.0 x</span>
+        </div>
+        <input type="range" id="rngVolumeBoost" min="0.5" max="4.0" step="0.5" value="3.0" />
+      </div>
 
       <div class="setting-group">
         <div class="setting-label">
@@ -871,15 +945,25 @@
         </div>
       </div>
 
-      <!-- 3. CÀI ĐẶT NGƯỠNG LỰC G TỐI ĐA (100%) -->
-      <div class="section-divider">3. Độ nhạy cảm biến (Mốc 100%)</div>
+      <!-- 3. CHỈNH NHANH ĐỒNG LOẠT 4 NGƯỠNG CẢM BIẾN & CHI TIẾT -->
+      <div class="section-divider">3. Chỉnh nhanh đồng loạt 4 ngưỡng cảm biến</div>
+
+      <div class="setting-group">
+        <div class="setting-label">
+          <span>Tỷ lệ ngưỡng đồng loạt (So với gốc)</span>
+          <span id="lblMasterScale">100 %</span>
+        </div>
+        <input type="range" id="rngMasterScale" min="30" max="130" step="5" value="100" />
+        <!-- Các nút bấm nhanh 50%, 60%... được sinh tự động từ mảng QUICK_SCALE_PRESETS -->
+        <div id="scalePresetsContainer" class="preset-scale-grid"></div>
+      </div>
 
       <div class="setting-group">
         <div class="setting-label">
           <span>Ngưỡng Tăng tốc (Ga 100%)</span>
           <span id="lblMaxGa">0.25 G</span>
         </div>
-        <input type="range" id="rngMaxGa" min="0.12" max="0.50" step="0.01" value="0.25" />
+        <input type="range" id="rngMaxGa" min="0.05" max="0.50" step="0.01" value="0.25" />
       </div>
 
       <div class="setting-group">
@@ -887,7 +971,7 @@
           <span>Ngưỡng Phanh (Thắng 100%)</span>
           <span id="lblMaxPhanh">0.28 G</span>
         </div>
-        <input type="range" id="rngMaxPhanh" min="0.12" max="0.55" step="0.01" value="0.28" />
+        <input type="range" id="rngMaxPhanh" min="0.05" max="0.55" step="0.01" value="0.28" />
       </div>
 
       <div class="setting-group">
@@ -895,7 +979,7 @@
           <span>Ngưỡng Vào cua (Cua 100%)</span>
           <span id="lblMaxCua">0.25 G</span>
         </div>
-        <input type="range" id="rngMaxCua" min="0.12" max="0.50" step="0.01" value="0.25" />
+        <input type="range" id="rngMaxCua" min="0.05" max="0.50" step="0.01" value="0.25" />
       </div>
 
       <div class="setting-group">
@@ -903,12 +987,12 @@
           <span>Độ nhạy bắt lỗi Lạng lách / Giật lái</span>
           <span id="lblMaxJerk">0.35 G/s</span>
         </div>
-        <input type="range" id="rngMaxJerk" min="0.18" max="0.70" step="0.02" value="0.35" />
+        <input type="range" id="rngMaxJerk" min="0.08" max="0.70" step="0.01" value="0.35" />
       </div>
 
       <!-- 4. GÓC THÔNG TIN TÀI LIỆU THAM KHẢO -->
       <div class="ref-info-box">
-        <div class="ref-info-title">📚 Nguồn tham khảo các thông số chuẩn:</div>
+        <div class="ref-info-title">📚 Nguồn tham khảo các thông số chuẩn (Mốc 100%):</div>
         <div>• <strong>Ga (0.25G), Phanh (0.28G), Vào cua (0.25G):</strong> Theo tiêu chuẩn quốc tế <strong>ISO 2631-1</strong> (Độ êm ái & chống say xe cho hành khách) và chuẩn Telematics (<strong>Geotab / Samsara</strong>). Dưới 0.18G (~70%) là vùng êm ái tuyệt đối; vượt 0.25G–0.28G người ngồi sau phải gồng cơ cổ/lưng để giữ thăng bằng.</div>
         <div style="margin-top: 4px;">• <strong>Lạng lách / Giật ngang (0.35 G/s):</strong> Theo tài liệu động lực học thiết kế đường đèo (<strong>AASHTO / IEEE Intelligent Vehicles</strong>). Độ giật ngang (Jerk) vượt 0.35 G/s (~3.4 m/s³) gây hiệu ứng quăng đầu đột ngột, dễ gây tiền đình trên đường núi.</div>
       </div>
@@ -916,6 +1000,27 @@
   </div>
 
   <script>
+    /**************************************************************
+     * 0. CẤU HÌNH CÁC NÚT ĐỘ NHẠY NHANH (DỄ DÀNG THÊM / BỚT SỐ)
+     * - Bạn có thể thêm/xóa các số % trong ngoặc vuông dưới đây:
+     **************************************************************/
+    const QUICK_SCALE_PRESETS = [20, 30, 40, 50, 60, 70, 80, 90, 100];
+
+    // Bộ thông số gốc chuẩn (Ứng với mức 100%)
+    const BASE_THRESHOLDS = {
+      maxGa: 0.25,
+      maxPhanh: 0.28,
+      maxCua: 0.25,
+      maxJerk: 0.35
+    };
+
+    const WAVE_TYPES = ['square', 'sine', 'triangle'];
+    const WAVE_NAMES = {
+      square: 'Square (Siêu to)',
+      triangle: 'Triangle (Vừa)',
+      sine: 'Sine (Êm)'
+    };
+
     /**************************************************************
      * 1. ĐĂNG KÝ SERVICE WORKER
      **************************************************************/
@@ -929,31 +1034,33 @@
      * 2. QUẢN LÝ CẤU HÌNH NGƯỜI DÙNG (LOCALSTORAGE)
      **************************************************************/
     const defaultConfig = {
+      masterScale: 40,     // Tỷ lệ % đồng loạt cho 4 ngưỡng cảm biến
       maxGa: 0.25,
       maxPhanh: 0.28,
       maxCua: 0.25,
       maxJerk: 0.35,
+      waveType: 'square',   // Mặc định sóng vuông ('square')
+      volumeBoost: 3.0,     // Mặc định khuếch đại 3.0
       startBeep: 70,        // Mức % bắt đầu kêu bíp tuyến tính
       scoreRecovery: 3,     // Tốc độ hồi phục điểm êm ái (dt * scoreRecovery)
       peakHoldTime: 1.5,    // Thời gian giữ vạch/số đỉnh Peak Hold (giây)
       alertHoldTime: 3.0,   // Thời gian giữ hiển thị cảnh báo ngắn gọn (giây)
-      testMode: true,
       theme: 'light',
       chartType: 'bar'
     };
 
     let config = { ...defaultConfig };
     try {
-      const saved = JSON.parse(localStorage.getItem('smoodri_cfg_v3'));
+      const saved = JSON.parse(localStorage.getItem('smoodri_cfg_v4'));
       if (saved) config = { ...defaultConfig, ...saved };
     } catch (e) {}
 
     function saveConfig() {
-      localStorage.setItem('smoodri_cfg_v3', JSON.stringify(config));
+      localStorage.setItem('smoodri_cfg_v4', JSON.stringify(config));
     }
 
     /**************************************************************
-     * 3. GIAO DIỆN SÁNG/TỐI, KIỂU BIỂU ĐỒ & VẠCH MỐC %
+     * 3. GIAO DIỆN, KIỂU BIỂU ĐỒ, KIỂU SÓNG & ĐỘ NHẠY ĐỒNG LOẠT
      **************************************************************/
     function applyTheme(themeName) {
       config.theme = themeName;
@@ -997,6 +1104,89 @@
       saveConfig();
     }
 
+    function applyWaveType(wave, playSample = false) {
+      if (!WAVE_TYPES.includes(wave)) wave = 'square';
+      config.waveType = wave;
+
+      document.getElementById('lblWaveType').textContent = WAVE_NAMES[wave] || wave;
+      document.getElementById('mainWaveLabel').textContent = wave.toUpperCase();
+
+      ['square', 'triangle', 'sine'].forEach((w) => {
+        const btn = document.querySelector(`[data-wave="${w}"]`);
+        if (btn) btn.classList.toggle('selected', w === wave);
+      });
+
+      saveConfig();
+      if (playSample) {
+        emitSingleBeep(1850, 75);
+      }
+    }
+
+    // Sinh tự động các nút bấm % Độ nhạy từ mảng QUICK_SCALE_PRESETS
+    function renderScalePresetButtons() {
+      const container = document.getElementById('scalePresetsContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      QUICK_SCALE_PRESETS.forEach((pct) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn-option preset-scale-btn';
+        btn.dataset.scale = pct;
+        btn.textContent = `${pct}%`;
+        if (Number(config.masterScale) === pct) {
+          btn.classList.add('selected');
+        }
+        btn.addEventListener('click', () => {
+          applyMasterScale(pct, true);
+        });
+        container.appendChild(btn);
+      });
+    }
+
+    function updateScaleUIHighlights(pct) {
+      document.getElementById('lblMasterScale').textContent = `${pct} %`;
+      document.getElementById('rngMasterScale').value = pct;
+      document.getElementById('mainScaleLabel').textContent = `${pct}%`;
+
+      document.querySelectorAll('.preset-scale-btn').forEach((btn) => {
+        btn.classList.toggle('selected', Number(btn.dataset.scale) === Number(pct));
+      });
+    }
+
+    // Hàm cập nhật đồng loạt cả 4 ngưỡng cảm biến theo tỷ lệ %
+    function applyMasterScale(scalePct, playSample = false) {
+      const pct = Math.max(20, Math.min(150, Number(scalePct) || 100));
+      config.masterScale = pct;
+      const ratio = pct / 100;
+
+      config.maxGa = Math.max(0.05, +(BASE_THRESHOLDS.maxGa * ratio).toFixed(2));
+      config.maxPhanh = Math.max(0.05, +(BASE_THRESHOLDS.maxPhanh * ratio).toFixed(2));
+      config.maxCua = Math.max(0.05, +(BASE_THRESHOLDS.maxCua * ratio).toFixed(2));
+      config.maxJerk = Math.max(0.08, +(BASE_THRESHOLDS.maxJerk * ratio).toFixed(2));
+
+      // Đồng bộ lên 4 thanh trượt chi tiết
+      const mapSliders = [
+        ['rngMaxGa', 'lblMaxGa', config.maxGa, 'G'],
+        ['rngMaxPhanh', 'lblMaxPhanh', config.maxPhanh, 'G'],
+        ['rngMaxCua', 'lblMaxCua', config.maxCua, 'G'],
+        ['rngMaxJerk', 'lblMaxJerk', config.maxJerk, 'G/s']
+      ];
+      mapSliders.forEach(([sId, lId, val, unit]) => {
+        const s = document.getElementById(sId);
+        const l = document.getElementById(lId);
+        if (s) s.value = val;
+        if (l) l.textContent = `${val.toFixed(2)} ${unit}`;
+      });
+
+      updateScaleUIHighlights(pct);
+      saveConfig();
+
+      if (playSample) {
+        emitSingleBeep(1750, 60);
+      }
+    }
+
     function syncBeepLevels() {
       const start = Number(config.startBeep) || 70;
       config.beepLvl1 = start;
@@ -1021,7 +1211,7 @@
     }
 
     /**************************************************************
-     * 4. BỘ PHÁT TIẾNG BÍP TUYẾN TÍNH & ÂM SẮC RIÊNG CHO LẠNG LÁCH
+     * 4. BỘ PHÁT ÂM THANH DUAL-TONE (1500Hz - 2800Hz, GAIN BOOST 3.0)
      **************************************************************/
     let audioCtx = null;
     let lastBeepTime = 0;
@@ -1037,29 +1227,41 @@
       }
     }
 
-    function emitSingleBeep(freq, durationMs, waveType = 'sine', volume = 1) {
+    // Phát 2 luồng âm đồng thời (Dual-Tone) với hệ số khuếch đại lớn (mặc định 3.0)
+    function emitSingleBeep(freq, durationMs, customWave = null, customVol = null) {
       initAudioContext();
       if (!audioCtx) return;
 
       const now = audioCtx.currentTime;
-      const osc = audioCtx.createOscillator();
+      const wave = customWave || config.waveType || 'square';
+      const volume = customVol !== null ? customVol : (Number(config.volumeBoost) || 3.0);
+
+      const osc1 = audioCtx.createOscillator();
+      const osc2 = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
 
-      osc.type = waveType;
-      osc.frequency.setValueAtTime(freq, now);
+      osc1.type = wave;
+      osc2.type = wave;
+
+      // Chập 2 tần số trong vùng nhạy nhất của tai người (1500Hz - 2800Hz)
+      osc1.frequency.setValueAtTime(freq, now);
+      osc2.frequency.setValueAtTime(Math.round(freq * 1.18), now);
 
       gain.gain.setValueAtTime(0.001, now);
-      gain.gain.linearRampToValueAtTime(volume, now + 0.01);
+      gain.gain.linearRampToValueAtTime(volume, now + 0.008);
       gain.gain.exponentialRampToValueAtTime(0.001, now + durationMs / 1000);
 
-      osc.connect(gain);
+      osc1.connect(gain);
+      osc2.connect(gain);
       gain.connect(audioCtx.destination);
 
-      osc.start(now);
-      osc.stop(now + durationMs / 1000 + 0.02);
+      osc1.start(now);
+      osc2.start(now);
+      osc1.stop(now + durationMs / 1000 + 0.02);
+      osc2.stop(now + durationMs / 1000 + 0.02);
     }
 
-    // Tiếng bíp tuyến tính cho Ga / Phanh / Vào cua
+    // Tiếng bíp tuyến tính cho Ga / Phanh / Vào cua (1600Hz -> 2600Hz)
     function handleLinearBeep(maxPct) {
       const startLimit = config.startBeep || 70;
       if (maxPct < startLimit) {
@@ -1070,50 +1272,48 @@
       const now = performance.now();
       const ratio = Math.min(1, (maxPct - startLimit) / Math.max(1, 100 - startLimit));
 
-      // Khoảng nghỉ giữa 2 tiếng bíp thu hẹp tuyến tính từ 650ms xuống 115ms
+      // Khoảng nghỉ giữa 2 nhịp bíp thu hẹp tuyến tính từ 650ms xuống 115ms
       const intervalMs = Math.round(650 - ratio * (650 - 115));
-      const freq = Math.round(600 + ratio * 420);
-      const wave = ratio > 0.7 ? 'triangle' : 'sine';
+      // Tần số nằm trong vùng nhạy nhất của tai người: 1600Hz -> 2600Hz
+      const freq = Math.round(1600 + ratio * 1000);
 
       if (now - lastBeepTime >= intervalMs) {
         lastBeepTime = now;
-        emitSingleBeep(freq, 65, wave, 1);
+        emitSingleBeep(freq, 65);
         if (maxPct < 100) {
-          setTimeout(() => emitSingleBeep(freq, 65, wave, 1), 110);
+          setTimeout(() => emitSingleBeep(freq, 65), 110);
         }
       }
+    }
 
-    // Âm sắc riêng biệt cho lỗi Lạng lách / Giật lái (Âm kép Cao-Thấp luân phiên)
+    // Âm sắc riêng biệt cho lỗi Lạng lách / Giật lái (2800Hz - 1750Hz luân phiên)
     function handleWeavingBeep() {
       const now = performance.now();
       const intervalMs = 135;
       if (now - lastBeepTime >= intervalMs) {
         lastBeepTime = now;
         weaveToneToggle = !weaveToneToggle;
-        const freq = weaveToneToggle ? 1180 : 720;
-        emitSingleBeep(freq, 90, 'sawtooth', 1);
+        const freq = weaveToneToggle ? 2800 : 1750;
+        emitSingleBeep(freq, 85);
       }
     }
 
     /**************************************************************
-     * 5. THUẬT TOÁN CẢM BIẾN 3D, CHỈ BÙ DỐC DỌC & PEAK HOLD
+     * 5. THUẬT TOÁN CẢM BIẾN 3D, CHỈ BÙ DỐC DỌC & BỘ ĐẾM VƯỢT NGƯỠNG
      **************************************************************/
     let isRunning = false;
     let needsCalibration = false;
     let hasSensorData = false;
     let smoothnessScore = 100;
+    let violationCount = 0;
+    let isCurrentlyViolating = false;
+    let lastViolationTime = 0;
     let wakeLock = null;
-    let gpsWatchId = null;
-
-    let currentSpeedKmh = 0;
-    let hasGpsFix = false;
-    let lastAltitude = null;
-    let altitudeDelta = 0;
 
     let manualOffset = { x: 0, y: 0, z: 1 };
     let rawSensor = { x: 0, y: 0, z: 1 };
 
-    // Chỉ bù dốc tự động theo trục dọc (lon) khi lên/xuống đèo, KHÔNG bù trục ngang (x) để tránh văng ngược chấm xanh sau khi thoát cua dài
+    // Chỉ bù dốc tự động theo trục dọc (lon) khi lên/xuống đèo
     let slopeBaselineLon = 0;
     let smoothG = { x: 0, lon: 0 };
     let prevLateralG = 0;
@@ -1140,7 +1340,7 @@
       weaving: false
     };
 
-    function calibrateZeroG() {
+    function calibrateZeroG(resetScoreAndCount = false) {
       if (hasSensorData) {
         manualOffset.x = rawSensor.x;
         manualOffset.y = rawSensor.y;
@@ -1158,32 +1358,14 @@
         peakHoldData[k].time = 0;
       });
       alertHoldData.active = false;
-    }
+      isCurrentlyViolating = false;
 
-    function startBackgroundGPS() {
-      if (!('geolocation' in navigator)) return;
-      gpsWatchId = navigator.geolocation.watchPosition(
-        (pos) => {
-          hasGpsFix = true;
-          if (pos.coords.speed !== null && !isNaN(pos.coords.speed)) {
-            currentSpeedKmh = pos.coords.speed * 3.6;
-          }
-          if (pos.coords.altitude !== null && !isNaN(pos.coords.altitude)) {
-            if (lastAltitude !== null) {
-              altitudeDelta = Math.abs(pos.coords.altitude - lastAltitude);
-            }
-            lastAltitude = pos.coords.altitude;
-          }
-        },
-        () => { hasGpsFix = false; },
-        { enableHighAccuracy: true, maximumAge: 2000, timeout: 10000 }
-      );
-    }
-
-    function stopBackgroundGPS() {
-      if (gpsWatchId !== null && 'geolocation' in navigator) {
-        navigator.geolocation.clearWatch(gpsWatchId);
-        gpsWatchId = null;
+      if (resetScoreAndCount) {
+        smoothnessScore = 100;
+        violationCount = 0;
+        document.getElementById('scoreValue').textContent = '100';
+        document.getElementById('scoreValue').style.color = 'var(--green)';
+        document.getElementById('violationCount').textContent = '0';
       }
     }
 
@@ -1220,7 +1402,7 @@
       hasSensorData = true;
 
       if (needsCalibration) {
-        calibrateZeroG();
+        calibrateZeroG(false);
       }
 
       // 1. TÍNH LỰC NGANG (X) & LỰC DỌC TĂNG TỐC/PHANH (Gộp trục Y-Z theo góc gắn máy)
@@ -1234,12 +1416,12 @@
         lonCal = (dy * manualOffset.z - dz * manualOffset.y) / normYZ;
       }
 
-      // 2. TỰ ĐỘNG PHÁT HIỆN ĐỘ DỐC ĐƯỜNG ĐÈO & CHỈ BÙ DỐC TRỤC DỌC (Không bù trục ngang X)
+      // 2. TỰ ĐỘNG PHÁT HIỆN ĐỘ DỐC ĐƯỜNG ĐÈO & CHỈ BÙ DỐC TRỤC DỌC
       const slopeAlpha = Math.min(dt / 4.0, 0.05);
       slopeBaselineLon += (lonCal - slopeBaselineLon) * slopeAlpha;
 
       const slopeDeg = Math.round(Math.abs(Math.asin(Math.max(-1, Math.min(1, slopeBaselineLon))) * (180 / Math.PI)));
-      const isMountainPass = slopeDeg >= 3 || altitudeDelta > 1.5;
+      const isMountainPass = slopeDeg >= 3;
       updateSlopeBadge(slopeDeg, isMountainPass);
 
       // 3. TÍNH LỰC G ĐỘNG TÁC ĐỘNG LÊN NGƯỜI NGỒI SAU
@@ -1302,7 +1484,6 @@
       const holdMs = (Number(config.peakHoldTime) || 0) * 1000;
       const pk = peakHoldData[key];
 
-      // Cập nhật Peak Hold
       if (livePct >= pk.val) {
         pk.val = livePct;
         if (livePct > 0) pk.time = now;
@@ -1316,7 +1497,7 @@
       const liveColor = getLevelColor(livePct);
       const peakColor = getLevelColor(displayPct);
 
-      // 1. Cập nhật Thanh ngang (Bar): Thanh màu chạy theo lực thực tế, con số % & vạch đỉnh giữ theo Peak Hold
+      // 1. Thanh ngang (Bar)
       const bar = document.getElementById(`bar${key}`);
       const val = document.getElementById(`val${key}`);
       const peakLine = document.getElementById(`peak${key}`);
@@ -1334,7 +1515,7 @@
         peakLine.style.opacity = '0';
       }
 
-      // 2. Cập nhật Vòng tròn (Donut): Giữ vòng & số theo Peak Hold để liếc nhìn dễ dàng
+      // 2. Vòng tròn (Donut)
       const ring = document.getElementById(`donut${key}`);
       const dVal = document.getElementById(`donutVal${key}`);
       const circumference = 188.5;
@@ -1374,21 +1555,25 @@
       ball.style.boxShadow = `0 0 12px ${ballColor}`;
       document.getElementById('cupReadout').textContent = `${totalG.toFixed(2)} G`;
 
-      const isParked = !config.testMode && hasGpsFix && currentSpeedKmh < 5;
       const banner = document.getElementById('alertBanner');
       const title = document.getElementById('alertTitle');
       const sub = document.getElementById('alertSub');
 
-      if (isParked) {
-        banner.className = 'alert-banner';
-        title.textContent = 'XE ĐANG ĐỖ';
-        sub.textContent = 'Tạm khóa tiếng bíp dưới 5 km/h';
-        handleLinearBeep(0);
-        return;
-      }
-
       const startLimit = Number(config.startBeep) || 70;
       const isTriggered = isWeaving || maxPct >= startLimit;
+      const isSevere = isWeaving || maxPct >= 100;
+
+      // Đếm số lần vượt ngưỡng (chỉ tăng 1 lần cho mỗi pha vượt ngưỡng >= 100% hoặc lạng lách)
+      if (isSevere) {
+        if (!isCurrentlyViolating && now - lastViolationTime > 1200) {
+          violationCount++;
+          lastViolationTime = now;
+          document.getElementById('violationCount').textContent = violationCount;
+        }
+        isCurrentlyViolating = true;
+      } else if (maxPct < 88 && !isWeaving) {
+        isCurrentlyViolating = false;
+      }
 
       // 1. XỬ LÝ ÂM THANH & ĐIỂM ÊM ÁI THEO THỜI GIAN THỰC
       if (isWeaving) {
@@ -1468,11 +1653,12 @@
     }
 
     /**************************************************************
-     * 6. SỰ KIỆN NÚT BẤM & CÀI ĐẶT
+     * 6. SỰ KIỆN NÚT BẤM MÀN HÌNH CHÍNH & CÀI ĐẶT
      **************************************************************/
     const btnStart = document.getElementById('btnStart');
     const btnQuickCalib = document.getElementById('btnQuickCalib');
-    const btnTestMode = document.getElementById('btnTestMode');
+    const btnMainScale = document.getElementById('btnMainScale');
+    const btnMainWave = document.getElementById('btnMainWave');
 
     btnStart.addEventListener('click', async () => {
       initAudioContext();
@@ -1493,20 +1679,18 @@
 
         isRunning = true;
         prevTimestamp = performance.now();
-        calibrateZeroG();
+        calibrateZeroG(true);
         window.addEventListener('devicemotion', handleMotion);
-        startBackgroundGPS();
         requestWakeLock();
 
         btnStart.classList.add('running');
         btnStart.innerHTML = '<span>⏹ DỪNG LẠI</span>';
         document.getElementById('alertTitle').textContent = 'ĐANG THEO DÕI';
         document.getElementById('alertSub').textContent = 'Đã cân chỉnh 0G - Sẵn sàng lăn bánh';
-        emitSingleBeep(700, 60, 'sine', 0.15);
+        emitSingleBeep(1750, 60);
       } else {
         isRunning = false;
         window.removeEventListener('devicemotion', handleMotion);
-        stopBackgroundGPS();
         handleLinearBeep(0);
         if (wakeLock) {
           wakeLock.release().catch(() => {});
@@ -1522,28 +1706,28 @@
     });
 
     btnQuickCalib.addEventListener('click', () => {
-      calibrateZeroG();
+      calibrateZeroG(false);
       initAudioContext();
-      emitSingleBeep(880, 50, 'sine', 0.15);
+      emitSingleBeep(1950, 55);
       document.getElementById('alertTitle').textContent = 'ĐÃ ĐẶT LẠI TÂM 0G';
       document.getElementById('alertSub').textContent = 'Đã nhận góc nghiêng hiện tại làm gốc';
     });
 
-    function renderTestModeButton() {
-      const stateEl = document.getElementById('testModeState');
-      if (config.testMode) {
-        btnTestMode.classList.add('active');
-        stateEl.textContent = 'ĐANG BẬT';
-      } else {
-        btnTestMode.classList.remove('active');
-        stateEl.textContent = 'ĐANG TẮT';
-      }
-    }
+    // Nút ĐỘ NHẠY ngoài màn hình chính: Bấm để xoay vòng qua danh sách QUICK_SCALE_PRESETS
+    btnMainScale.addEventListener('click', () => {
+      initAudioContext();
+      const current = Number(config.masterScale) || 100;
+      const idx = QUICK_SCALE_PRESETS.indexOf(current);
+      const nextIdx = (idx + 1) % QUICK_SCALE_PRESETS.length;
+      applyMasterScale(QUICK_SCALE_PRESETS[nextIdx], true);
+    });
 
-    btnTestMode.addEventListener('click', () => {
-      config.testMode = !config.testMode;
-      saveConfig();
-      renderTestModeButton();
+    // Nút KIỂU ÂM BÁO ngoài màn hình chính: Bấm để xoay vòng Square -> Sine -> Triangle
+    btnMainWave.addEventListener('click', () => {
+      initAudioContext();
+      const idx = WAVE_TYPES.indexOf(config.waveType);
+      const nextIdx = (idx + 1) % WAVE_TYPES.length;
+      applyWaveType(WAVE_TYPES[nextIdx], true);
     });
 
     // Mở / Đóng Cài đặt
@@ -1562,29 +1746,39 @@
     document.getElementById('btnChartBar').addEventListener('click', () => applyChartType('bar'));
     document.getElementById('btnChartDonut').addEventListener('click', () => applyChartType('donut'));
 
+    // Chọn kiểu sóng âm trong Cài đặt
+    document.getElementById('btnWaveSquare').addEventListener('click', () => applyWaveType('square', true));
+    document.getElementById('btnWaveTriangle').addEventListener('click', () => applyWaveType('triangle', true));
+    document.getElementById('btnWaveSine').addEventListener('click', () => applyWaveType('sine', true));
+
+    // Thanh trượt tổng chỉnh đồng loạt 4 ngưỡng cảm biến
+    document.getElementById('rngMasterScale').addEventListener('input', (e) => {
+      applyMasterScale(parseFloat(e.target.value), false);
+    });
+
     // Nút nghe thử âm thanh tuyến tính & âm thanh Lạng lách
     document.getElementById('btnTestBeepLow').addEventListener('click', () => {
       initAudioContext();
-      emitSingleBeep(600, 80, 'sine', 0.25);
-      setTimeout(() => emitSingleBeep(600, 80, 'sine', 0.25), 150); // Tiếng bíp thứ 2 sau 0.15 giây
+      emitSingleBeep(1650, 70);
+      setTimeout(() => emitSingleBeep(1650, 70), 140);
     });
 
     document.getElementById('btnTestBeepHigh').addEventListener('click', () => {
       initAudioContext();
       for (let i = 0; i < 4; i++) {
-        setTimeout(() => emitSingleBeep(1020, 75, 'triangle', 0.3), i * 130);
+        setTimeout(() => emitSingleBeep(2550, 70), i * 125);
       }
     });
 
     document.getElementById('btnTestWeave').addEventListener('click', () => {
       initAudioContext();
       for (let i = 0; i < 4; i++) {
-        const freq = i % 2 === 0 ? 1180 : 720;
-        setTimeout(() => emitSingleBeep(freq, 85, 'sawtooth', 1), i * 135);
+        const freq = i % 2 === 0 ? 2800 : 1750;
+        setTimeout(() => emitSingleBeep(freq, 85), i * 135);
       }
     });
 
-    // Khai báo hàm bindSlider trước khi gọi
+    // Khai báo hàm bindSlider
     function bindSlider(sliderId, labelId, cfgKey, unit, decimals = 2) {
       const slider = document.getElementById(sliderId);
       const label = document.getElementById(labelId);
@@ -1602,6 +1796,7 @@
       });
     }
 
+    bindSlider('rngVolumeBoost', 'lblVolumeBoost', 'volumeBoost', 'x', 1);
     bindSlider('rngStartBeep', 'lblStartBeep', 'startBeep', '%', 0);
     bindSlider('rngScoreRecovery', 'lblScoreRecovery', 'scoreRecovery', 'đ/s', 0);
     bindSlider('rngPeakHoldTime', 'lblPeakHoldTime', 'peakHoldTime', 'giây', 1);
@@ -1612,10 +1807,12 @@
     bindSlider('rngMaxJerk', 'lblMaxJerk', 'maxJerk', 'G/s', 2);
 
     // Khởi chạy trạng thái ban đầu
+    renderScalePresetButtons();
     applyTheme(config.theme);
     applyChartType(config.chartType);
+    applyWaveType(config.waveType, false);
+    updateScaleUIHighlights(config.masterScale);
     updateVisualThresholdMarkers();
-    renderTestModeButton();
   </script>
 </body>
 </html>

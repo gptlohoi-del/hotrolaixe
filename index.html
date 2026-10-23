@@ -263,7 +263,7 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 8px 12px;
+      padding: 0px 12px 8px 1px; /* Trên: 0px, Phải: 12px, Dưới: 8px, Trái: 1px sát mép */
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -340,14 +340,14 @@
 
     .cup-readout {
       position: absolute;
-      bottom: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 15px;
+      bottom: 8px;       /* Khoảng cách cách đáy cốc nước */
+      left: 50%;         /* Đang ở chính giữa theo chiều ngang */
+      transform: translateX(-50%); /* Căn giữa */
+      font-size: 16px;
       font-weight: 900;
       color: var(--text);
       font-family: monospace;
-      background: rgba(255, 255, 255, 0.65);
+      background: rgba(255, 255, 255, 0.6);
       padding: 1px 7px;
       border-radius: 8px;
       z-index: 3;

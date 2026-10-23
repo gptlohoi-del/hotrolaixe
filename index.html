@@ -237,7 +237,7 @@
     }
 
     .alert-title {
-      font-size: 19px;
+      font-size: 18px;
       font-weight: 900;
       letter-spacing: 0.2px;
       line-height: 1.15;
@@ -263,7 +263,7 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 10px 12px;
+      padding: 8px 12px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -278,15 +278,15 @@
       padding-left: 8px;
       position: relative;
       flex: 1;
-      min-height: 115px;
-      max-height: 210px;
+      min-height: 105px;
+      max-height: 190px;
     }
 
     .cup-circle {
       height: 100%;
       aspect-ratio: 1 / 1;
-      max-width: 195px;
-      max-height: 195px;
+      max-width: 180px;
+      max-height: 180px;
       border-radius: 50%;
       border: 2.5px solid var(--red);
       background: var(--cup-bg);
@@ -343,7 +343,7 @@
       bottom: 8px;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 900;
       color: var(--text);
       font-family: monospace;
@@ -358,11 +358,11 @@
       background: rgba(15, 23, 42, 0.72);
     }
 
-    /* KIỂU 1: 3 THANH NGANG (BAR CHART) */
+    /* KIỂU 1: 4 THANH NGANG (BAR CHART) */
     .bars-container {
       display: flex;
       flex-direction: column;
-      gap: 9px;
+      gap: 7px;
       margin-top: 4px;
     }
 
@@ -373,19 +373,19 @@
     .bar-item {
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 2px;
     }
 
     .bar-header {
       display: flex;
       justify-content: space-between;
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 700;
     }
 
     .bar-track {
       width: 100%;
-      height: 30px;
+      height: 24px;
       background: var(--bar-bg);
       border-radius: 8px;
       position: relative;
@@ -433,11 +433,11 @@
       transition: width 0.08s linear, background-color 0.12s ease;
     }
 
-    /* KIỂU 2: 3 VÒNG TRÒN (DONUT CHART) */
+    /* KIỂU 2: 4 VÒNG TRÒN (DONUT CHART) */
     .donuts-container {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
       padding: 6px 0 2px 0;
       align-items: center;
     }
@@ -454,13 +454,13 @@
       background: var(--btn-bg);
       border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 8px 4px;
+      padding: 7px 3px;
     }
 
     .donut-svg-wrap {
       position: relative;
-      width: 74px;
-      height: 74px;
+      width: 64px;
+      height: 64px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -490,13 +490,13 @@
 
     .donut-val {
       position: absolute;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 900;
       color: var(--text);
     }
 
     .donut-label {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 800;
       color: var(--subtext);
       text-align: center;
@@ -746,7 +746,7 @@
         </div>
       </div>
 
-      <!-- HIỂN THỊ KIỂU 1: BIỂU ĐỒ THANH NGANG (BAR CHART) -->
+      <!-- HIỂN THỊ KIỂU 1: BIỂU ĐỒ 4 THANH NGANG (BAR CHART) -->
       <div id="barsView" class="bars-container">
         <div class="bar-item">
           <div class="bar-header">
@@ -786,9 +786,23 @@
             <div id="barCua" class="bar-fill"></div>
           </div>
         </div>
+
+        <!-- THANH THỨ 4: Ổ GÀ & ĐƯỜNG XÓC -->
+        <div class="bar-item">
+          <div class="bar-header">
+            <span>💥 Ổ GÀ & ĐƯỜNG XÓC</span>
+            <span id="valXoc">0%</span>
+          </div>
+          <div class="bar-track">
+            <div id="markXoc1" class="bar-mark-lvl1"></div>
+            <div id="markXoc2" class="bar-mark-lvl2"></div>
+            <div id="peakXoc" class="bar-peak-hold"></div>
+            <div id="barXoc" class="bar-fill"></div>
+          </div>
+        </div>
       </div>
 
-      <!-- HIỂN THỊ KIỂU 2: BIỂU ĐỒ VÒNG TRÒN (DONUT CHART) -->
+      <!-- HIỂN THỊ KIỂU 2: BIỂU ĐỒ 4 VÒNG TRÒN (DONUT CHART) -->
       <div id="donutsView" class="donuts-container hidden">
         <div class="donut-item">
           <div class="donut-svg-wrap">
@@ -798,7 +812,7 @@
             </svg>
             <span id="donutValGa" class="donut-val">0%</span>
           </div>
-          <span class="donut-label">🚀 TĂNG TỐC</span>
+          <span class="donut-label">🚀 GA</span>
         </div>
 
         <div class="donut-item">
@@ -820,7 +834,18 @@
             </svg>
             <span id="donutValCua" class="donut-val">0%</span>
           </div>
-          <span class="donut-label">🔄 VÀO CUA</span>
+          <span class="donut-label">🔄 CUA</span>
+        </div>
+
+        <div class="donut-item">
+          <div class="donut-svg-wrap">
+            <svg class="donut-svg" viewBox="0 0 72 72">
+              <circle class="donut-track" cx="36" cy="36" r="30"></circle>
+              <circle id="donutXoc" class="donut-ring" cx="36" cy="36" r="30"></circle>
+            </svg>
+            <span id="donutValXoc" class="donut-val">0%</span>
+          </div>
+          <span class="donut-label">💥 Ổ GÀ</span>
         </div>
       </div>
     </div>
@@ -830,7 +855,7 @@
       <button id="btnStart" class="btn-main">
         <span>🎯 CÂN CHỈNH & BẮT ĐẦU</span>
       </button>
-      <button id="btnMainScale" class="btn-quick-action" title="Đổi nhanh đồng loạt 4 ngưỡng cảm biến">
+      <button id="btnMainScale" class="btn-quick-action" title="Đổi nhanh đồng loạt các ngưỡng cảm biến">
         <span>ĐỘ NHẠY</span>
         <strong id="mainScaleLabel">40%</strong>
       </button>
@@ -891,22 +916,14 @@
 
       <div class="setting-group">
         <div class="setting-label">
-          <span>Âm báo đặc biệt khi qua Ôm sát Ổ gà / Xóc</span>
-          <span id="lblPotholeWave">Chuông lùi (Sawtooth)</span>
+          <span>Âm báo đặc biệt khi qua Ổ gà / Đường xóc</span>
+          <span id="lblPotholeWave">Sawtooth (Chuông lùi)</span>
         </div>
         <div class="option-grid-3">
           <button class="btn-option" id="btnPotholeSaw" data-pothole="sawtooth">🚨 Sawtooth</button>
           <button class="btn-option" id="btnPotholeSquare" data-pothole="square">📢 Square</button>
           <button class="btn-option" id="btnPotholeSine" data-pothole="sine">🔉 Sine</button>
         </div>
-      </div>
-
-      <div class="setting-group">
-        <div class="setting-label">
-          <span>Ngưỡng phát hiện Ổ gà / Đường xóc (G dọc)</span>
-          <span id="lblPotholeThreshold">0.30 G</span>
-        </div>
-        <input type="range" id="rngPotholeThreshold" min="0.15" max="0.60" step="0.05" value="0.30" />
       </div>
 
       <div class="setting-group">
@@ -958,8 +975,8 @@
         </div>
       </div>
 
-      <!-- 3. CHỈNH NHANH ĐỒNG LOẠT 4 NGƯỠNG CẢM BIẾN & CHI TIẾT -->
-      <div class="section-divider">3. Chỉnh nhanh đồng loạt 4 ngưỡng cảm biến</div>
+      <!-- 3. CHỈNH NHANH ĐỒNG LOẠT CÁC NGƯỠNG CẢM BIẾN & CHI TIẾT -->
+      <div class="section-divider">3. Chỉnh nhanh đồng loạt các ngưỡng cảm biến</div>
 
       <div class="setting-group">
         <div class="setting-label">
@@ -996,8 +1013,16 @@
 
       <div class="setting-group">
         <div class="setting-label">
+          <span>Ngưỡng Ổ gà & Đường xóc (Xóc 100%)</span>
+          <span id="lblPotholeThreshold">0.30 G</span>
+        </div>
+        <input type="range" id="rngPotholeThreshold" min="0.08" max="0.65" step="0.01" value="0.30" />
+      </div>
+
+      <div class="setting-group">
+        <div class="setting-label">
           <span>Độ nhạy bắt lỗi Lạng lách / Giật lái</span>
-          <span id="lblMaxJerk">0.35 G/s</span>
+          <span id="lblMaxJerk">0.30 G/s</span>
         </div>
         <input type="range" id="rngMaxJerk" min="0.08" max="0.70" step="0.01" value="0.30" />
       </div>
@@ -1006,7 +1031,7 @@
       <div class="ref-info-box">
         <div class="ref-info-title">📚 Nguồn tham khảo các thông số chuẩn (Mốc 100%):</div>
         <div>• <strong>Ga (0.25G), Phanh (0.28G), Vào cua (0.25G):</strong> Theo tiêu chuẩn quốc tế <strong>ISO 2631-1</strong> (Độ êm ái & chống say xe cho hành khách) và chuẩn Telematics (<strong>Geotab / Samsara</strong>). Dưới 0.18G (~70%) là vùng êm ái tuyệt đối; vượt 0.25G–0.28G người ngồi sau phải gồng cơ cổ/lưng để giữ thăng bằng.</div>
-        <div style="margin-top: 4px;">• <strong>Lạng lách / Giật ngang (0.35 G/s):</strong> Theo tài liệu động lực học thiết kế đường đèo (<strong>AASHTO / IEEE Intelligent Vehicles</strong>). Độ giật ngang (Jerk) vượt 0.35 G/s (~3.4 m/s³) gây hiệu ứng quăng đầu đột ngột, dễ gây tiền đình trên đường núi.</div>
+        <div style="margin-top: 4px;">• <strong>Ổ gà / Xóc (0.30G) & Lạng lách (0.30 G/s):</strong> Theo tài liệu động lực học thiết kế đường đèo (<strong>AASHTO / IEEE Intelligent Vehicles</strong>). Gia tốc xóc thẳng đứng vượt 0.30G hoặc độ giật ngang vượt 0.30 G/s gây nảy người và quăng đầu đột ngột.</div>
       </div>
     </div>
   </div>
@@ -1021,7 +1046,8 @@
       maxGa: 0.25,
       maxPhanh: 0.28,
       maxCua: 0.25,
-      maxJerk: 0.35
+      potholeThreshold: 0.30,
+      maxJerk: 0.30
     };
 
     const WAVE_TYPES = ['square', 'sine', 'triangle'];
@@ -1052,13 +1078,13 @@
      **************************************************************/
     const defaultConfig = {
       masterScale: 40,
-      maxGa: 0.25,
-      maxPhanh: 0.28,
-      maxCua: 0.25,
-      maxJerk: 0.30,
+      maxGa: 0.10,
+      maxPhanh: 0.11,
+      maxCua: 0.10,
+      potholeThreshold: 0.12, // Ngưỡng 100% cho thanh Ổ gà & Đường xóc
+      maxJerk: 0.12,
       waveType: 'square',
-      potholeWave: 'sawtooth', // Kiểu âm thanh riêng cho ổ gà / xóc
-      potholeThreshold: 0.30,  // Ngưỡng G dọc phát hiện ổ gà
+      potholeWave: 'sawtooth',
       volumeBoost: 3.0,
       startBeep: 70,
       scoreRecovery: 3,
@@ -1070,12 +1096,12 @@
 
     let config = { ...defaultConfig };
     try {
-      const saved = JSON.parse(localStorage.getItem('smoodri_cfg_v5'));
+      const saved = JSON.parse(localStorage.getItem('smoodri_cfg_v6'));
       if (saved) config = { ...defaultConfig, ...saved };
     } catch (e) {}
 
     function saveConfig() {
-      localStorage.setItem('smoodri_cfg_v5', JSON.stringify(config));
+      localStorage.setItem('smoodri_cfg_v6', JSON.stringify(config));
     }
 
     /**************************************************************
@@ -1193,12 +1219,14 @@
       config.maxGa = Math.max(0.05, +(BASE_THRESHOLDS.maxGa * ratio).toFixed(2));
       config.maxPhanh = Math.max(0.05, +(BASE_THRESHOLDS.maxPhanh * ratio).toFixed(2));
       config.maxCua = Math.max(0.05, +(BASE_THRESHOLDS.maxCua * ratio).toFixed(2));
+      config.potholeThreshold = Math.max(0.08, +(BASE_THRESHOLDS.potholeThreshold * ratio).toFixed(2));
       config.maxJerk = Math.max(0.08, +(BASE_THRESHOLDS.maxJerk * ratio).toFixed(2));
 
       const mapSliders = [
         ['rngMaxGa', 'lblMaxGa', config.maxGa, 'G'],
         ['rngMaxPhanh', 'lblMaxPhanh', config.maxPhanh, 'G'],
         ['rngMaxCua', 'lblMaxCua', config.maxCua, 'G'],
+        ['rngPotholeThreshold', 'lblPotholeThreshold', config.potholeThreshold, 'G'],
         ['rngMaxJerk', 'lblMaxJerk', config.maxJerk, 'G/s']
       ];
       mapSliders.forEach(([sId, lId, val, unit]) => {
@@ -1230,9 +1258,11 @@
       document.getElementById('cupRingLvl2').style.width = `${r2}%`;
       document.getElementById('cupRingLvl2').style.height = `${r2}%`;
 
-      ['Ga', 'Phanh', 'Cua'].forEach((k) => {
-        document.getElementById(`mark${k}1`).style.left = `${Math.min(98, config.beepLvl1)}%`;
-        document.getElementById(`mark${k}2`).style.left = `${Math.min(98, config.beepLvl2)}%`;
+      ['Ga', 'Phanh', 'Cua', 'Xoc'].forEach((k) => {
+        const m1 = document.getElementById(`mark${k}1`);
+        const m2 = document.getElementById(`mark${k}2`);
+        if (m1) m1.style.left = `${Math.min(98, config.beepLvl1)}%`;
+        if (m2) m2.style.left = `${Math.min(98, config.beepLvl2)}%`;
       });
     }
 
@@ -1286,7 +1316,7 @@
       osc2.stop(now + durationMs / 1000 + 0.02);
     }
 
-    // Âm thanh riêng biệt khi qua ổ gà / xóc (Sử dụng cấu hình sóng riêng, ví dụ Sawtooth chuông lùi)
+    // Âm thanh riêng biệt khi qua ổ gà / đường xóc
     function emitPotholeBeep() {
       initAudioContext();
       if (!audioCtx) return;
@@ -1295,7 +1325,6 @@
       const wave = config.potholeWave || 'sawtooth';
       const volume = Number(config.volumeBoost) || 3.0;
 
-      // Phát chuỗi 2 tiếng còi đặc trưng khi sập ổ gà
       [0, 140].forEach((delay) => {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
@@ -1349,7 +1378,7 @@
     }
 
     /**************************************************************
-     * 5. THUẬT TOÁN CẢM BIẾN & PHÁT HIỆN Ổ GÀ / ĐƯỜNG XÓC
+     * 5. THUẬT TOÁN CẢM BIẾN 3D & ĐO LỰC XÓC THẲNG ĐỨNG CHUẨN MỌI GÓC ĐẶT MÁY
      **************************************************************/
     let isRunning = false;
     let needsCalibration = false;
@@ -1364,7 +1393,8 @@
     let rawSensor = { x: 0, y: 0, z: 1 };
 
     let slopeBaselineLon = 0;
-    let smoothG = { x: 0, lon: 0 };
+    let vertBaseline = 0; // Đường cơ sở lọc trọng lực cho trục thẳng đứng (ổ gà)
+    let smoothG = { x: 0, lon: 0, vert: 0 };
     let prevLateralG = 0;
     let prevTimestamp = performance.now();
 
@@ -1374,7 +1404,8 @@
     const peakHoldData = {
       Ga: { val: 0, time: 0 },
       Phanh: { val: 0, time: 0 },
-      Cua: { val: 0, time: 0 }
+      Cua: { val: 0, time: 0 },
+      Xoc: { val: 0, time: 0 }
     };
 
     const alertHoldData = {
@@ -1384,8 +1415,8 @@
       peakGa: 0,
       peakPhanh: 0,
       peakCua: 0,
-      weaving: false,
-      pothole: false
+      peakXoc: 0,
+      weaving: false
     };
 
     function calibrateZeroG(resetScoreAndCount = false) {
@@ -1398,10 +1429,12 @@
         needsCalibration = true;
       }
       slopeBaselineLon = 0;
+      vertBaseline = 0;
       smoothG.x = 0;
       smoothG.lon = 0;
+      smoothG.vert = 0;
       reversalTimestamps = [];
-      ['Ga', 'Phanh', 'Cua'].forEach((k) => {
+      ['Ga', 'Phanh', 'Cua', 'Xoc'].forEach((k) => {
         peakHoldData[k].val = 0;
         peakHoldData[k].time = 0;
       });
@@ -1453,7 +1486,8 @@
         calibrateZeroG(false);
       }
 
-      const xCal = gxRaw - manualOffset.x;
+      // 1. ĐỘ LỆCH SO VỚI TÂM 0G KHI BẤM CÂN CHỈNH (ĐÚNG VỚI MỌI GÓC ĐẶT ĐIỆN THOẠI)
+      const dx = gxRaw - manualOffset.x;
       const dy = gyRaw - manualOffset.y;
       const dz = gzRaw - manualOffset.z;
 
@@ -1463,6 +1497,16 @@
         lonCal = (dy * manualOffset.z - dz * manualOffset.y) / normYZ;
       }
 
+      // 2. TÍNH LỰC XÓC THẲNG ĐỨNG (Chiếu dọc theo phương trọng lực thực tế của máy)
+      const norm3D = Math.hypot(manualOffset.x, manualOffset.y, manualOffset.z) || 1;
+      let vertCal = (dx * manualOffset.x + dy * manualOffset.y + dz * manualOffset.z) / norm3D;
+
+      // Bộ lọc thông cao (High-pass filter) để loại bỏ độ nghiêng tĩnh, chỉ bắt xung xóc ổ gà/mố cầu
+      const vertAlpha = Math.min(dt / 0.6, 0.15);
+      vertBaseline += (vertCal - vertBaseline) * vertAlpha;
+      let dynamicVert = Math.abs(vertCal - vertBaseline);
+
+      // 3. TỰ ĐỘNG PHÁT HIỆN ĐỘ DỐC ĐƯỜNG ĐÈO & CHỈ BÙ DỐC TRỤC DỌC
       const slopeAlpha = Math.min(dt / 4.0, 0.05);
       slopeBaselineLon += (lonCal - slopeBaselineLon) * slopeAlpha;
 
@@ -1470,7 +1514,7 @@
       const isMountainPass = slopeDeg >= 3;
       updateSlopeBadge(slopeDeg, isMountainPass);
 
-      let dynamicX = xCal;
+      let dynamicX = dx;
       let dynamicLon = lonCal - slopeBaselineLon;
 
       if (lin && lin.x !== null && lin.y !== null) {
@@ -1478,13 +1522,21 @@
         const linY = lin.y / 9.80665;
         const linZ = (lin.z || 0) / 9.80665;
         const linLon = normYZ > 0.25 ? (linY * manualOffset.z - linZ * manualOffset.y) / normYZ : linY;
+        const linVert = Math.abs((linX * manualOffset.x + linY * manualOffset.y + linZ * manualOffset.z) / norm3D);
+
         dynamicX = dynamicX * 0.5 + linX * 0.5;
         dynamicLon = dynamicLon * 0.5 + linLon * 0.5;
+        dynamicVert = dynamicVert * 0.5 + linVert * 0.5;
       }
+
+      // Khử nhiễu cảm biến siêu nhỏ khi máy đang đứng im trên bàn/giá đỡ (< 0.015G -> 0)
+      if (dynamicVert < 0.015) dynamicVert = 0;
 
       const smoothAlpha = 0.22;
       smoothG.x += (dynamicX - smoothG.x) * smoothAlpha;
       smoothG.lon += (dynamicLon - smoothG.lon) * smoothAlpha;
+      // Lực xóc ổ gà dùng hệ số phản hồi nhanh hơn (0.45) để bắt kịp cú dằn xóc ngắn
+      smoothG.vert += (dynamicVert - smoothG.vert) * 0.45;
 
       const lateralJerk = Math.abs(smoothG.x - prevLateralG) / dt;
       prevLateralG = smoothG.x;
@@ -1502,7 +1554,7 @@
         reversalTimestamps.length >= 2 ||
         (lateralJerk > config.maxJerk && Math.abs(smoothG.x) > config.maxCua * 0.65);
 
-      evaluateAndRender(smoothG.x, smoothG.lon, isWeaving, dt, now, ag);
+      evaluateAndRender(smoothG.x, smoothG.lon, smoothG.vert, isWeaving, dt, now);
     }
 
     function updateSlopeBadge(deg, isMountain) {
@@ -1545,51 +1597,59 @@
       const val = document.getElementById(`val${key}`);
       const peakLine = document.getElementById(`peak${key}`);
 
-      bar.style.width = `${liveClamped}%`;
-      bar.style.backgroundColor = liveColor;
-      val.textContent = `${displayPct}%`;
-      val.style.color = displayPct >= config.beepLvl1 ? peakColor : 'var(--text)';
+      if (bar && val && peakLine) {
+        bar.style.width = `${liveClamped}%`;
+        bar.style.backgroundColor = liveColor;
+        val.textContent = `${displayPct}%`;
+        val.style.color = displayPct >= config.beepLvl1 ? peakColor : 'var(--text)';
 
-      if (holdMs > 0 && displayPct >= 15) {
-        peakLine.style.opacity = '1';
-        peakLine.style.left = `calc(${peakClamped}% - 2px)`;
-        peakLine.style.backgroundColor = peakColor;
-      } else {
-        peakLine.style.opacity = '0';
+        if (holdMs > 0 && displayPct >= 15) {
+          peakLine.style.opacity = '1';
+          peakLine.style.left = `calc(${peakClamped}% - 2px)`;
+          peakLine.style.backgroundColor = peakColor;
+        } else {
+          peakLine.style.opacity = '0';
+        }
       }
 
       const ring = document.getElementById(`donut${key}`);
       const dVal = document.getElementById(`donutVal${key}`);
-      const circumference = 188.5;
-      const offset = circumference - (peakClamped / 100) * circumference;
-      ring.style.strokeDashoffset = offset;
-      ring.style.stroke = peakColor;
-      dVal.textContent = `${displayPct}%`;
-      dVal.style.color = displayPct >= config.beepLvl1 ? peakColor : 'var(--text)';
+      if (ring && dVal) {
+        const circumference = 188.5;
+        const offset = circumference - (peakClamped / 100) * circumference;
+        ring.style.strokeDashoffset = offset;
+        ring.style.stroke = peakColor;
+        dVal.textContent = `${displayPct}%`;
+        dVal.style.color = displayPct >= config.beepLvl1 ? peakColor : 'var(--text)';
+      }
     }
 
-    function evaluateAndRender(gx, glon, isWeaving, dt, now, ag) {
+    function evaluateAndRender(gx, glon, gvert, isWeaving, dt, now) {
       const accelG = Math.max(0, glon);
       const brakeG = Math.max(0, -glon);
       const cornerG = Math.abs(gx);
       const totalG = Math.hypot(gx, glon);
 
+      const potholeLimit = Number(config.potholeThreshold) || 0.30;
+
       const pctGa = Math.min(150, Math.round((accelG / config.maxGa) * 100));
       const pctPhanh = Math.min(150, Math.round((brakeG / config.maxPhanh) * 100));
       const pctCua = Math.min(150, Math.round((cornerG / config.maxCua) * 100));
-      const maxPct = Math.max(pctGa, pctPhanh, pctCua);
+      const pctXoc = Math.min(150, Math.round((gvert / potholeLimit) * 100));
+
+      const maxDrivingPct = Math.max(pctGa, pctPhanh, pctCua);
+      const maxAllPct = Math.max(maxDrivingPct, pctXoc);
 
       updateMetricDisplay('Ga', pctGa, now);
       updateMetricDisplay('Phanh', pctPhanh, now);
       updateMetricDisplay('Cua', pctCua, now);
+      updateMetricDisplay('Xoc', pctXoc, now);
 
-      // Phát hiện ổ gà / đường xóc thông qua lực thẳng đứng (Z) hoặc gia tốc thuần túy đột ngột
-      const verticalJolt = Math.abs((ag.z || 9.80665) - 9.80665) / 9.80665;
-      const potholeLimit = Number(config.potholeThreshold) || 0.30;
-      let isPothole = false;
+      const startLimit = Number(config.startBeep) || 70;
+      const isPotholeTriggered = pctXoc >= startLimit;
 
-      if (verticalJolt >= potholeLimit && now - lastPotholeTime > 900) {
-        isPothole = true;
+      // Phát âm thanh riêng khi thanh Ổ gà & Đường xóc vượt mức cảnh báo
+      if (isPotholeTriggered && now - lastPotholeTime > 750) {
         lastPotholeTime = now;
         emitPotholeBeep();
       }
@@ -1601,7 +1661,7 @@
       const normY = Math.max(-1, Math.min(1, glon / maxRef));
 
       const ball = document.getElementById('gBall');
-      const ballColor = isWeaving || isPothole ? 'var(--red)' : getLevelColor(maxPct);
+      const ballColor = isWeaving || pctXoc >= 100 ? 'var(--red)' : getLevelColor(maxAllPct);
       ball.style.transform = `translate(${normX * maxRadiusPx}px, ${-normY * maxRadiusPx}px)`;
       ball.style.background = ballColor;
       ball.style.boxShadow = `0 0 12px ${ballColor}`;
@@ -1611,9 +1671,8 @@
       const title = document.getElementById('alertTitle');
       const sub = document.getElementById('alertSub');
 
-      const startLimit = Number(config.startBeep) || 70;
-      const isTriggered = isPothole || isWeaving || maxPct >= startLimit;
-      const isSevere = isWeaving || isPothole || maxPct >= 100;
+      const isTriggered = isWeaving || maxAllPct >= startLimit;
+      const isSevere = isWeaving || maxAllPct >= 100;
 
       if (isSevere) {
         if (!isCurrentlyViolating && now - lastViolationTime > 1200) {
@@ -1622,21 +1681,22 @@
           document.getElementById('violationCount').textContent = violationCount;
         }
         isCurrentlyViolating = true;
-      } else if (maxPct < 88 && !isWeaving && !isPothole) {
+      } else if (maxAllPct < 88 && !isWeaving) {
         isCurrentlyViolating = false;
       }
 
       if (isWeaving) {
         smoothnessScore = Math.max(0, smoothnessScore - dt * 12);
         handleWeavingBeep();
-      } else if (isPothole) {
-        smoothnessScore = Math.max(0, smoothnessScore - dt * 7);
-      } else if (maxPct >= 100) {
+      } else if (maxDrivingPct >= 100) {
         smoothnessScore = Math.max(0, smoothnessScore - dt * 9);
-        handleLinearBeep(maxPct);
-      } else if (maxPct >= startLimit) {
+        handleLinearBeep(maxDrivingPct);
+      } else if (maxDrivingPct >= startLimit) {
         smoothnessScore = Math.max(0, smoothnessScore - dt * 3);
-        handleLinearBeep(maxPct);
+        handleLinearBeep(maxDrivingPct);
+      } else if (isPotholeTriggered) {
+        smoothnessScore = Math.max(0, smoothnessScore - dt * (pctXoc >= 100 ? 6 : 2));
+        handleLinearBeep(0);
       } else {
         handleLinearBeep(0);
         const recRate = Number(config.scoreRecovery) || 3;
@@ -1650,39 +1710,39 @@
           alertHoldData.peakGa = 0;
           alertHoldData.peakPhanh = 0;
           alertHoldData.peakCua = 0;
+          alertHoldData.peakXoc = 0;
           alertHoldData.maxLevel = 0;
           alertHoldData.weaving = false;
-          alertHoldData.pothole = false;
         }
 
         alertHoldData.active = true;
         alertHoldData.lastTriggerTime = now;
 
-        if (isPothole) alertHoldData.pothole = true;
         if (isWeaving) alertHoldData.weaving = true;
         if (pctGa >= startLimit) alertHoldData.peakGa = Math.max(alertHoldData.peakGa, pctGa);
         if (pctPhanh >= startLimit) alertHoldData.peakPhanh = Math.max(alertHoldData.peakPhanh, pctPhanh);
         if (pctCua >= startLimit) alertHoldData.peakCua = Math.max(alertHoldData.peakCua, pctCua);
-        alertHoldData.maxLevel = Math.max(alertHoldData.maxLevel, maxPct);
+        if (pctXoc >= startLimit) alertHoldData.peakXoc = Math.max(alertHoldData.peakXoc, pctXoc);
+        alertHoldData.maxLevel = Math.max(alertHoldData.maxLevel, maxAllPct);
       }
 
       if (alertHoldData.active && now - alertHoldData.lastTriggerTime <= alertHoldMs) {
         const parts = [];
-        if (alertHoldData.pothole) parts.push('Ổ gà / Xóc!');
         if (alertHoldData.weaving) parts.push('Lạng lách!');
         if (alertHoldData.peakGa >= startLimit) parts.push(`Ga: ${alertHoldData.peakGa}%`);
         if (alertHoldData.peakPhanh >= startLimit) parts.push(`Phanh: ${alertHoldData.peakPhanh}%`);
         if (alertHoldData.peakCua >= startLimit) parts.push(`Cua: ${alertHoldData.peakCua}%`);
+        if (alertHoldData.peakXoc >= startLimit) parts.push(`Xóc: ${alertHoldData.peakXoc}%`);
 
         banner.className = 'alert-banner';
-        if (alertHoldData.maxLevel >= 100 || alertHoldData.weaving || alertHoldData.pothole) {
+        if (alertHoldData.maxLevel >= 100 || alertHoldData.weaving) {
           banner.classList.add('warn-100');
           sub.textContent = isTriggered ? 'Vượt ngưỡng! Giảm cường độ ngay' : 'Đang giữ thông số đỉnh vừa vượt';
         } else {
           banner.classList.add('warn-80');
           sub.textContent = isTriggered ? 'Nới nhẹ thao tác để giữ êm ái' : 'Đang giữ thông số cảnh báo';
         }
-        title.textContent = parts.join('  •  ') || `Cảnh báo: ${alertHoldData.maxLevel}%`;
+        title.textContent = parts.join(' • ') || `Cảnh báo: ${alertHoldData.maxLevel}%`;
       } else {
         alertHoldData.active = false;
         banner.className = 'alert-banner';
@@ -1795,18 +1855,6 @@
     document.getElementById('btnPotholeSquare').addEventListener('click', () => applyPotholeWave('square', true));
     document.getElementById('btnPotholeSine').addEventListener('click', () => applyPotholeWave('sine', true));
 
-    function applyPotholeWave(wave, playSample = false) {
-      if (!POTHOLE_WAVES.includes(wave)) wave = 'sawtooth';
-      config.potholeWave = wave;
-      document.getElementById('lblPotholeWave').textContent = POTHOLE_WAVE_NAMES[wave] || wave;
-      ['sawtooth', 'square', 'sine'].forEach((w) => {
-        const btn = document.querySelector(`[data-pothole="${w}"]`);
-        if (btn) btn.classList.toggle('selected', w === wave);
-      });
-      saveConfig();
-      if (playSample) emitPotholeBeep();
-    }
-
     document.getElementById('rngMasterScale').addEventListener('input', (e) => {
       applyMasterScale(parseFloat(e.target.value), false);
     });
@@ -1820,7 +1868,7 @@
     document.getElementById('btnTestBeepHigh').addEventListener('click', () => {
       initAudioContext();
       for (let i = 0; i < 4; i++) {
-        setTimeout(() => emitSingleBep(2550, 70), i * 125);
+        setTimeout(() => emitSingleBeep(2550, 70), i * 125);
       }
     });
 
@@ -1857,12 +1905,13 @@
     bindSlider('rngMaxCua', 'lblMaxCua', 'maxCua', 'G', 2);
     bindSlider('rngMaxJerk', 'lblMaxJerk', 'maxJerk', 'G/s', 2);
 
+    // Khởi chạy trạng thái ban đầu
     renderScalePresetButtons();
     applyTheme(config.theme);
     applyChartType(config.chartType);
     applyWaveType(config.waveType, false);
     applyPotholeWave(config.potholeWave, false);
-    updateScaleUIHighlights(config.masterScale);
+    applyMasterScale(config.masterScale, false);
     updateVisualThresholdMarkers();
   </script>
 </body>

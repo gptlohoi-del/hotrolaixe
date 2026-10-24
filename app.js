@@ -42,10 +42,11 @@ const defaultConfig = {
   maxGa: 0.10,
   maxPhanh: 0.11,
   maxCua: 0.10,
-  potholeThreshold: 0.12, // Ngưỡng 100% cho thanh Ổ gà & Đường xóc
+  potholeThreshold: 0.12,
   maxJerk: 0.12,
   waveType: 'square',
   potholeWave: 'sawtooth',
+  startDelay: 1.0,      // Thời gian delay mặc định trước khi bắt đầu (giây)
   volumeBoost: 3.0,
   startBeep: 70,
   scoreRecovery: 3,
@@ -57,12 +58,12 @@ const defaultConfig = {
 
 let config = { ...defaultConfig };
 try {
-  const saved = JSON.parse(localStorage.getItem('smoodri_cfg_v6'));
+  const saved = JSON.parse(localStorage.getItem('smoodri_cfg_v7'));
   if (saved) config = { ...defaultConfig, ...saved };
 } catch (e) {}
 
 function saveConfig() {
-  localStorage.setItem('smoodri_cfg_v6', JSON.stringify(config));
+  localStorage.setItem('smoodri_cfg_v7', JSON.stringify(config));
 }
 
 /**************************************************************
@@ -277,7 +278,6 @@ function emitSingleBeep(freq, durationMs, customWave = null, customVol = null) {
   osc2.stop(now + durationMs / 1000 + 0.02);
 }
 
-// Âm thanh riêng biệt khi qua ổ gà / đường xóc
 function emitPotholeBeep() {
   initAudioContext();
   if (!audioCtx) return;
@@ -339,9 +339,10 @@ function handleWeavingBeep() {
 }
 
 /**************************************************************
- * 5. THUẬT TOÁN CẢM BIẾN 3D & ĐO LỰC XÓC THẲNG ĐỨNG CHUẨN MỌI GÓC ĐẶT MÁY
+ * 5. THUẬT TOÁN CẢM BIẾN 3D & XỬ LÝ KHI BẮT ĐẦU VỚI DELAY
  **************************************************************/
 let isRunning = false;
+let isCountingDown = false; // Trạng thái đang đếm ngược chờ delay
 let needsCalibration = false;
 let hasSensorData = false;
 let smoothnessScore = 100;
@@ -354,7 +355,7 @@ let manualOffset = { x: 0, y: 0, z: 1 };
 let rawSensor = { x: 0, y: 0, z: 1 };
 
 let slopeBaselineLon = 0;
-let vertBaseline = 0; // Đường cơ sở lọc trọng lực cho trục thẳng đứng (ổ gà)
+let vertBaseline = 0;
 let smoothG = { x: 0, lon: 0, vert: 0 };
 let prevLateralG = 0;
 let prevTimestamp = performance.now();
@@ -424,7 +425,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 function handleMotion(event) {
-  if (!isRunning) return;
+  if (!isRunning || isCountingDown) return; // Nếu đang đếm ngược delay thì bỏ qua cảm biến
 
   const now = performance.now();
   const dt = Math.max((now - prevTimestamp) / 1000, 0.016);
@@ -447,7 +448,6 @@ function handleMotion(event) {
     calibrateZeroG(false);
   }
 
-  // 1. ĐỘ LỆCH SO VỚI TÂM 0G KHI BẤM CÂN CHỈNH (ĐÚNG VỚI MỌI GÓC ĐẶT ĐIỆN THOẠI)
   const dx = gxRaw - manualOffset.x;
   const dy = gyRaw - manualOffset.y;
   const dz = gzRaw - manualOffset.z;
@@ -458,16 +458,13 @@ function handleMotion(event) {
     lonCal = (dy * manualOffset.z - dz * manualOffset.y) / normYZ;
   }
 
-  // 2. TÍNH LỰC XÓC THẲNG ĐỨNG (Chiếu dọc theo phương trọng lực thực tế của máy)
   const norm3D = Math.hypot(manualOffset.x, manualOffset.y, manualOffset.z) || 1;
   let vertCal = (dx * manualOffset.x + dy * manualOffset.y + dz * manualOffset.z) / norm3D;
 
-  // Bộ lọc thông cao (High-pass filter) để loại bỏ độ nghiêng tĩnh, chỉ bắt xung xóc ổ gà/mố cầu
   const vertAlpha = Math.min(dt / 0.6, 0.15);
   vertBaseline += (vertCal - vertBaseline) * vertAlpha;
   let dynamicVert = Math.abs(vertCal - vertBaseline);
 
-  // 3. TỰ ĐỘNG PHÁT HIỆN ĐỘ DỐC ĐƯỜNG ĐÈO & CHỈ BÙ DỐC TRỤC DỌC
   const slopeAlpha = Math.min(dt / 4.0, 0.05);
   slopeBaselineLon += (lonCal - slopeBaselineLon) * slopeAlpha;
 
@@ -490,13 +487,11 @@ function handleMotion(event) {
     dynamicVert = dynamicVert * 0.5 + linVert * 0.5;
   }
 
-  // Khử nhiễu cảm biến siêu nhỏ khi máy đang đứng im trên bàn/giá đỡ (< 0.015G -> 0)
   if (dynamicVert < 0.015) dynamicVert = 0;
 
   const smoothAlpha = 0.22;
   smoothG.x += (dynamicX - smoothG.x) * smoothAlpha;
   smoothG.lon += (dynamicLon - smoothG.lon) * smoothAlpha;
-  // Lực xóc ổ gà dùng hệ số phản hồi nhanh hơn (0.45) để bắt kịp cú dằn xóc ngắn
   smoothG.vert += (dynamicVert - smoothG.vert) * 0.45;
 
   const lateralJerk = Math.abs(smoothG.x - prevLateralG) / dt;
@@ -609,7 +604,6 @@ function evaluateAndRender(gx, glon, gvert, isWeaving, dt, now) {
   const startLimit = Number(config.startBeep) || 70;
   const isPotholeTriggered = pctXoc >= startLimit;
 
-  // Phát âm thanh riêng khi thanh Ổ gà & Đường xóc vượt mức cảnh báo
   if (isPotholeTriggered && now - lastPotholeTime > 750) {
     lastPotholeTime = now;
     emitPotholeBeep();
@@ -703,7 +697,7 @@ function evaluateAndRender(gx, glon, gvert, isWeaving, dt, now) {
       banner.classList.add('warn-80');
       sub.textContent = isTriggered ? 'Nới nhẹ thao tác để giữ êm ái' : 'Đang giữ thông số cảnh báo';
     }
-    title.textContent = parts.join(' • ') || `Cảnh báo: ${alertHoldData.maxLevel}%`;
+    title.textContent = parts.join(' • ') || `Cảnh báo: ${alertHoldData.maxLevel}`;
   } else {
     alertHoldData.active = false;
     banner.className = 'alert-banner';
@@ -744,18 +738,39 @@ btnStart.addEventListener('click', async () => {
     }
 
     isRunning = true;
-    prevTimestamp = performance.now();
-    calibrateZeroG(true);
+    isCountingDown = true; // Kích hoạt trạng thái chờ delay
+
+    // Hiển thị trạng thái đang đếm ngược trên banner
+    document.getElementById('alertBanner').className = 'alert-banner warn-70';
+    document.getElementById('alertTitle').textContent = 'ĐANG CHỜ ĐẶT MÁY...';
+    document.getElementById('alertSub').textContent = `Chuẩn bị trong ${config.startDelay} giây tới`;
+
+    btnStart.classList.add('running');
+    btnStart.innerHTML = '<span>⏳ ĐANG CHỜ...</span>';
+
+    // Bắt đầu lắng nghe sự kiện cảm biến nhưng hàm handleMotion sẽ tạm thời bỏ qua tính toán
     window.addEventListener('devicemotion', handleMotion);
     requestWakeLock();
 
-    btnStart.classList.add('running');
-    btnStart.innerHTML = '<span>⏹ DỪNG LẠI</span>';
-    document.getElementById('alertTitle').textContent = 'ĐANG THEO DÕI';
-    document.getElementById('alertSub').textContent = 'Đã cân chỉnh 0G - Sẵn sàng lăn bánh';
-    emitSingleBeep(1750, 60);
+    // Thực hiện đếm ngược thời gian delay
+    const delayMs = (Number(config.startDelay) || 1.0) * 1000;
+    setTimeout(() => {
+      if (!isRunning) return; // Nếu người dùng bấm Dừng trong lúc đang đếm ngược thì thôi
+
+      isCountingDown = false; // Hết giờ delay, chính thức lấy thông tin cảm biến
+      prevTimestamp = performance.now();
+      calibrateZeroG(true);   // Cân chỉnh tâm 0G ngay tại thời điểm bắt đầu chạy thực tế
+
+      btnStart.innerHTML = '<span>⏹ DỪNG LẠI</span>';
+      document.getElementById('alertBanner').className = 'alert-banner';
+      document.getElementById('alertTitle').textContent = 'ĐANG THEO DÕI';
+      document.getElementById('alertSub').textContent = 'Đã ổn định - Sẵn sàng lăn bánh';
+      emitSingleBeep(1750, 60);
+    }, delayMs);
+
   } else {
     isRunning = false;
+    isCountingDown = false;
     window.removeEventListener('devicemotion', handleMotion);
     handleLinearBeep(0);
     if (wakeLock) {
@@ -764,7 +779,7 @@ btnStart.addEventListener('click', async () => {
     }
 
     btnStart.classList.remove('running');
-    btnStart.innerHTML = '<span>🎯 CÂN CHỈNH & BẮT ĐẦU</span>';
+    btnStart.innerHTML = '<span>🎯 CÂN CHỈNH - BẮT ĐẦU</span>';
     document.getElementById('alertBanner').className = 'alert-banner';
     document.getElementById('alertTitle').textContent = 'ĐÃ TẠM DỪNG';
     document.getElementById('alertSub').textContent = 'Bấm nút dưới để cân chỉnh & chạy lại';
@@ -855,6 +870,7 @@ function bindSlider(sliderId, labelId, cfgKey, unit, decimals = 2) {
   });
 }
 
+bindSlider('rngStartDelay', 'lblStartDelay', 'startDelay', 'giây', 1);
 bindSlider('rngPotholeThreshold', 'lblPotholeThreshold', 'potholeThreshold', 'G', 2);
 bindSlider('rngVolumeBoost', 'lblVolumeBoost', 'volumeBoost', 'x', 1);
 bindSlider('rngStartBeep', 'lblStartBeep', 'startBeep', '%', 0);
